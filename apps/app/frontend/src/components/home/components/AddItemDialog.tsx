@@ -167,7 +167,12 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
                             </form>
 
                             <button
-                                onClick={() => setIsOpen(false)}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setIsOpen(false);
+                                }}
+                                type="button"
                                 class={css({
                                     position: 'absolute',
                                     top: '4',
@@ -177,7 +182,8 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
                                     _hover: { color: 'white', bg: 'slate.800' },
                                     rounded: 'md',
                                     transition: 'colors',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    zIndex: '10'
                                 })}
                                 aria-label="Close dialog"
                             >
