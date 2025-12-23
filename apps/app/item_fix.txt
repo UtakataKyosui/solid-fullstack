@@ -1,0 +1,9 @@
+genre.rsと同じパターンで、以下の変更が必要:
+1. auth::JWTパラメータをコメントアウト
+2. 各関数の最初にlet user_id = 1;を追加
+3. users::Model::find_by_pid の行を削除
+4. user.id を user_id に置き換え
+5. users importをコメントアウト
+
+これはsrc/controllers/location.rsで既に完了しています。
+item.rsに同じパターンを適用する必要があります。
