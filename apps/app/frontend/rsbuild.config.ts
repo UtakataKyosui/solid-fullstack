@@ -1,6 +1,7 @@
 import { defineConfig } from '@rsbuild/core';
 import { pluginBabel } from '@rsbuild/plugin-babel';
 import { pluginSolid } from '@rsbuild/plugin-solid';
+import path from 'path';
 
 // Docs: https://rsbuild.rs/config/
 export default defineConfig({
@@ -10,6 +11,12 @@ export default defineConfig({
     }),
     pluginSolid(),
   ],
+  source: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      'styled-system': path.resolve(__dirname, './styled-system'),
+    },
+  },
   server: {
     proxy: {
       '/api': {

@@ -1,33 +1,41 @@
 {
   "compilerOptions": {
-    "lib": [
-      "DOM",
-      "ES2020"
-    ],
-    "jsx": "preserve",
     "target": "ES2020",
-    "noEmit": true,
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": [
+      "ES2020",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "skipLibCheck": true,
     "jsxImportSource": "solid-js",
-    "useDefineForClassFields": true,
-    "baseUrl": ".",
-    "paths": {
-      "~/*": [
-        "./src/*"
-      ]
-    },
-    /* modules */
-    "module": "ESNext",
-    "moduleDetection": "force",
+    /* Bundler mode */
     "moduleResolution": "bundler",
-    "verbatimModuleSyntax": true,
-    "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
-    "noUncheckedSideEffectImports": true,
-    /* type checking */
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "preserve",
+    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "verbatimModuleSyntax": true,
+    /* Path Aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "~/*": [
+        "./src/*"
+      ],
+      "styled-system/*": [
+        "./styled-system/*"
+      ]
+    }
   },
   "include": [
     "src"

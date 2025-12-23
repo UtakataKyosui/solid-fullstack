@@ -10,20 +10,20 @@
   },
   "dependencies": {
     "@ark-ui/solid": "^5.30.0",
-    "@park-ui/tailwind-plugin": "^0.20.1",
     "@simplewebauthn/browser": "^13.2.2",
     "@thisbeyond/solid-dnd": "^0.7.5",
     "lucide-solid": "^0.562.0",
     "solid-js": "^1.9.10"
   },
   "devDependencies": {
+    "@pandacss/dev": "^1.7.1",
+    "@pandacss/postcss": "^1.7.1",
     "@park-ui/cli": "^1.0.1",
+    "@park-ui/panda-preset": "^0.43.1",
     "@rsbuild/core": "^1.6.14",
     "@rsbuild/plugin-babel": "^1.0.6",
     "@rsbuild/plugin-solid": "^1.0.6",
-    "autoprefixer": "^10.4.23",
     "postcss": "^8.5.6",
-    "tailwindcss": "3.4",
     "typescript": "^5.9.3"
   }
 }

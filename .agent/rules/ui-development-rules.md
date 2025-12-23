@@ -1,6 +1,5 @@
 ---
 trigger: always_on
-glob:
-description:
 ---
 
+shadcn/uiやPark UIなどのUIライブラリを使用する場合、それらですでに存在しているものがあれば、それを取得して使用し、なかった場合には独自作成するようにしてください。
