@@ -4,6 +4,8 @@ import type { Genre } from '../../../lib/types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { css } from 'styled-system/css';
+import { Stack, Box } from 'styled-system/jsx';
 
 interface AddLocationDialogProps {
     genres: Genre[];
@@ -54,49 +56,82 @@ export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
     return (
         <>
             <Button onClick={() => setIsOpen(true)}>Add Location</Button>
-            <Dialog isOpen={isOpen()} onClose={() => setIsOpen(false)} title="Add New Location">
-                <form onSubmit={handleSubmit} class="space-y-4">
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-slate-300">Name</label>
-                        <Input
-                            value={name()}
-                            onInput={(e) => setName(e.currentTarget.value)}
-                            required
-                            placeholder="Location name"
-                        />
-                    </div>
+            <Dialog.Root open={isOpen()} onOpenChange={(e) => setIsOpen(e.open)}>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                    <Dialog.Content>
+                        <Stack gap="4" p="6">
+                            <Dialog.Title>Add New Location</Dialog.Title>
+                            <Dialog.Description>
+                                Create a new location for organizing your items
+                            </Dialog.Description>
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-slate-300">Description</label>
-                        <Input
-                            value={description()}
-                            onInput={(e) => setDescription(e.currentTarget.value)}
-                            placeholder="Optional description"
-                        />
-                    </div>
+                            <form onSubmit={handleSubmit}>
+                                <Stack gap="4">
+                                    <Box>
+                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                            Name
+                                        </label>
+                                        <Input
+                                            value={name()}
+                                            onInput={(e) => setName(e.currentTarget.value)}
+                                            required
+                                            placeholder="Location name"
+                                        />
+                                    </Box>
 
-                    <div class="space-y-2">
-                        <label class="text-sm font-medium text-slate-300">Genre</label>
-                        <select
-                            class="w-full h-10 px-3 rounded-md bg-slate-950 border border-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-white"
-                            value={genreId()}
-                            onChange={(e) => setGenreId(e.currentTarget.value)}
-                            required
-                        >
-                            <option value="" disabled>Select a genre</option>
-                            <For each={props.genres}>
-                                {(genre) => <option value={genre.id}>{genre.name}</option>}
-                            </For>
-                        </select>
-                    </div>
+                                    <Box>
+                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                            Description
+                                        </label>
+                                        <Input
+                                            value={description()}
+                                            onInput={(e) => setDescription(e.currentTarget.value)}
+                                            placeholder="Optional description"
+                                        />
+                                    </Box>
 
-                    <div class="flex justify-end pt-4">
-                        <Button type="submit" disabled={loading()}>
-                            {loading() ? "Creating..." : "Create Location"}
-                        </Button>
-                    </div>
-                </form>
-            </Dialog>
+                                    <Box>
+                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                            Genre
+                                        </label>
+                                        <select
+                                            class={css({
+                                                w: 'full',
+                                                h: '10',
+                                                px: '3',
+                                                rounded: 'md',
+                                                bg: 'slate.950',
+                                                borderWidth: '1px',
+                                                borderColor: 'slate.800',
+                                                fontSize: 'sm',
+                                                color: 'white',
+                                                _focus: { outlineColor: 'blue.500' }
+                                            })}
+                                            value={genreId()}
+                                            onChange={(e) => setGenreId(e.currentTarget.value)}
+                                            required
+                                        >
+                                            <option value="" disabled>Select a genre</option>
+                                            <For each={props.genres}>
+                                                {(genre) => <option value={genre.id}>{genre.name}</option>}
+                                            </For>
+                                        </select>
+                                    </Box>
+
+                                    <Box class={css({ display: 'flex', justifyContent: 'flex-end', pt: '4' })}>
+                                        <Button type="submit" loading={loading()}>
+                                            {loading() ? "Creating..." : "Create Location"}
+                                        </Button>
+                                    </Box>
+                                </Stack>
+                            </form>
+
+                            <Dialog.CloseTrigger />
+                        </Stack>
+                    </Dialog.Content>
+                </Dialog.Positioner>
+            </Dialog.Root>
         </>
     );
 };
