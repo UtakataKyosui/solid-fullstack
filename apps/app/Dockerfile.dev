@@ -14,17 +14,18 @@ RUN cargo install cargo-watch --locked
 # Set working directory
 WORKDIR /app
 
-# Copy Cargo files
+# Copy Cargo files and migration directory
 COPY Cargo.toml Cargo.lock ./
+COPY migration ./migration
 
-# Create dummy source to cache dependencies
-RUN mkdir -p src && \
-    echo "fn main() {}" > src/main.rs && \
-    cargo build --release && \
-    rm -rf src
+# Copy source code
+COPY src ./src
+COPY config ./config
+COPY tests ./tests
+COPY examples ./examples
 
-# Copy actual source code
-COPY . .
+# Build the application
+RUN cargo build --release
 
 # Expose port
 EXPOSE 8000
