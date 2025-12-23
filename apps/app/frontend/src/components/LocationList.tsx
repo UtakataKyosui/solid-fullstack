@@ -17,13 +17,13 @@ const LocationList: Component = () => {
     const [formData, setFormData] = createSignal({ name: '', description: '', genre_id: 0 });
 
     const [locations, { refetch: refetchLocations }] = createResource<Location[]>(async () => {
-        const res = await fetchWithAuth('/api/locations/');
+        const res = await fetchWithAuth('/api/locations');
         if (!res.ok) return [];
         return res.json();
     });
 
     const [genres] = createResource<Genre[]>(async () => {
-        const res = await fetchWithAuth('/api/genres/');
+        const res = await fetchWithAuth('/api/genres');
         if (!res.ok) return [];
         return res.json();
     });
@@ -73,7 +73,7 @@ const LocationList: Component = () => {
 
                 addToast('success', '場所を更新しました');
             } else {
-                const res = await fetchWithAuth('/api/locations/', {
+                const res = await fetchWithAuth('/api/locations', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

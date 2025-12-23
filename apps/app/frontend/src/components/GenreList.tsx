@@ -17,7 +17,7 @@ const GenreList: Component = () => {
     const [formData, setFormData] = createSignal({ name: '', color: '#000000' });
 
     const [genres, { refetch }] = createResource<Genre[]>(async () => {
-        const res = await fetchWithAuth('/api/genres/');
+        const res = await fetchWithAuth('/api/genres');
         if (!res.ok) return [];
         return res.json();
     });
@@ -58,7 +58,7 @@ const GenreList: Component = () => {
 
                 addToast('success', 'ジャンルを更新しました');
             } else {
-                const res = await fetchWithAuth('/api/genres/', {
+                const res = await fetchWithAuth('/api/genres', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

@@ -20,7 +20,7 @@ const MainPage: Component = () => {
     const fetchPasskeys = async () => {
         try {
             console.log("Fetching passkeys...");
-            const res = await fetchWithAuth("/api/auth/passkeys/");
+            const res = await fetchWithAuth("/api/auth/passkeys");
             if (res.ok) {
                 const data = await res.json();
                 console.log("Passkeys fetched:", data);
