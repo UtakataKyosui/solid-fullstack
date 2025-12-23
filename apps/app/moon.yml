@@ -1,0 +1,39 @@
+type: 'application'
+language: 'rust'
+
+tasks:
+  build:
+    command: 'cargo build'
+    inputs:
+      - 'src/**/*'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'config/**/*'
+    deps:
+      - 'build-frontend'
+  
+  build-frontend:
+    command: 'cd frontend && deno task build'
+    inputs:
+      - 'frontend/src/**/*'
+      - 'frontend/package.json'
+      - 'frontend/rsbuild.config.ts'
+      - 'frontend/tsconfig.json'
+
+  dev:
+    command: 'cargo run --bin app-cli start'
+    local: true
+    inputs:
+      - 'src/**/*'
+      - 'config/**/*'
+    # Removed dep on build-frontend for dev as they run separately
+
+  dev-frontend:
+    command: 'cd frontend && deno task dev'
+    local: true
+
+  test:
+    command: 'cargo test'
+    inputs:
+      - 'src/**/*'
+      - 'tests/**/*'

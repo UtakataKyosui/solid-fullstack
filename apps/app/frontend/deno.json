@@ -1,0 +1,10 @@
+{
+    "tasks": {
+        "dev": "rsbuild dev --open",
+        "build": "rsbuild build"
+    },
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "solid-js"
+    }
+}
