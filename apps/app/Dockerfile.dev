@@ -1,4 +1,4 @@
-# Development Dockerfile with cargo-watch for hot reload
+# Development Dockerfile - builds and watches on container start
 FROM rust:1.83-slim
 
 # Install system dependencies
@@ -8,27 +8,15 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install cargo-watch for hot reload
-RUN cargo install cargo-watch --locked
-
 # Set working directory
 WORKDIR /app
 
-# Copy Cargo files and migration directory
-COPY Cargo.toml Cargo.lock ./
-COPY migration ./migration
-
-# Copy source code
-COPY src ./src
-COPY config ./config
-COPY tests ./tests
-COPY examples ./examples
-
-# Build the application
-RUN cargo build --release
+# Copy entire project (source files will be mounted as volume in docker-compose)
+COPY . .
 
 # Expose port
 EXPOSE 8000
 
-# Default command (can be overridden in docker-compose)
-CMD ["cargo", "watch", "-x", "run -- start"]
+# Build and watch for changes using loco
+# This will compile on first start and then watch for changes
+CMD ["cargo", "loco", "watch"]
