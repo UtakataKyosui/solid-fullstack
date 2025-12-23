@@ -1,5 +1,6 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show, For } from 'solid-js';
+import { createSignal, createEffect, Show } from 'solid-js';
+// import { For } from 'solid-js'; // Commented out with passkey features
 // import { startRegistration } from "@simplewebauthn/browser";
 import { useAuth } from '../lib/auth';
 // import type { Passkey } from '../lib/types';
@@ -7,12 +8,15 @@ import { Button } from '@/components/ui/button';
 import Home from './home/Home';
 import GenreList from './GenreList';
 import LocationList from './LocationList';
-import { Trash2, HomeIcon, Tags, MapPin } from 'lucide-solid';
+import { HomeIcon, Tags, MapPin } from 'lucide-solid';
+// import { Trash2 } from 'lucide-solid'; // Commented out with passkey features
 import { css } from 'styled-system/css';
-import { Stack, Box, Flex } from 'styled-system/jsx';
+import { Box, Flex } from 'styled-system/jsx';
+// import { Stack } from 'styled-system/jsx'; // Commented out with passkey features
 
 const MainPage: Component = () => {
-    const { user, logout, fetchWithAuth } = useAuth();
+    const { user, logout } = useAuth();
+    // const { fetchWithAuth } = useAuth(); //Commented out with passkey features
     // const [message, setMessage] = createSignal("");
     // const [passkeys, setPasskeys] = createSignal<Passkey[]>([]);
     const [activeTab, setActiveTab] = createSignal<'home' | 'genres' | 'locations'>('home');
@@ -170,8 +174,8 @@ const MainPage: Component = () => {
                 </button>
             </Flex>
 
+            {/* TODO: Re-enable Security section in separate authentication branch
             <Show when={activeTab() === 'home'}>
-                {/* TODO: Re-enable Security section in separate authentication branch
                 <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="lg">
                     <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', color: 'white', mb: '4' })}>
                         Security
@@ -273,8 +277,9 @@ const MainPage: Component = () => {
                         </div>
                     </Show>
                 </Box>
-                */}
             </Show>
+            */}
+
 
             <Show when={activeTab() === 'home'}>
                 <Home />
