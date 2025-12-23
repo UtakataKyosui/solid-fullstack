@@ -1,21 +1,28 @@
-export { absoluteCenter } from './absolute-center'
-export { button } from './button'
-export { dialog } from './dialog'
-export { group } from './group'
-export { icon } from './icon'
-export { input } from './input'
-export { spinner } from './spinner'
-export { toast } from './toast'
+import { absoluteCenter } from './absolute-center'
+import { button } from './button'
+import { dialog } from './dialog'
+import { group } from './group'
+import { icon } from './icon'
+import { input } from './input'
+import { spinner } from './spinner'
+import { toast } from './toast'
+
+export { absoluteCenter }
+export { button }
+export { dialog }
+export { group }
+export { icon }
+export { input }
+export { spinner }
+export { toast }
 
 export const recipes = {
   absoluteCenter,
   button,
-  dialog,
   group,
   icon,
   input,
   spinner,
-  toast,
 }
 
 export const slotRecipes = {

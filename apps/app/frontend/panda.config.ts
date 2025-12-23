@@ -1,4 +1,5 @@
 import { defineConfig } from "@pandacss/dev";
+import { recipes, slotRecipes } from './src/theme/recipes';
 
 export default defineConfig({
   // Whether to use css reset
@@ -10,9 +11,12 @@ export default defineConfig({
   // Files to exclude
   exclude: [],
 
-  // Useful for theme customization
+  // Theme configuration with recipes
   theme: {
-    extend: {},
+    extend: {
+      recipes,
+      slotRecipes,
+    },
   },
 
   // The output directory for your css system
