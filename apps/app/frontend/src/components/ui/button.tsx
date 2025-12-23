@@ -2,7 +2,7 @@ import { ark } from '@ark-ui/solid/factory'
 import { createContext } from '@ark-ui/solid/utils'
 import { type ComponentProps, createMemo, type JSX, mergeProps, Show, splitProps } from 'solid-js'
 import { styled } from 'styled-system/jsx'
-import { type ButtonVariantProps, button } from 'styled-system/recipes'
+import { type ButtonVariantProps, button } from '@/theme/recipes'
 import { Group, type GroupProps } from './group'
 import { Loader } from './loader'
 

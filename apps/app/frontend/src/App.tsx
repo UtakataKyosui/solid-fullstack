@@ -2,18 +2,36 @@ import { Show } from 'solid-js';
 import Auth from './components/auth/Auth';
 import MainPage from './components/MainPage';
 import { useAuth } from './lib/auth';
-import { Toaster } from './components/ui/Toast';
+import { Toaster } from '@/components/ui/toast';
+import { css } from 'styled-system/css';
 
 const App = () => {
   const { user } = useAuth();
 
   return (
-    <div class="min-h-screen bg-slate-950 text-white">
+    <div class={css({ minH: '100vh', bg: 'slate.950', color: 'white' })}>
       <Toaster />
       <Show when={user()} fallback={
-        <div class="flex flex-col items-center justify-center min-h-screen p-4">
-          <h1 class="text-4xl font-bold tracking-tight text-white mb-8 sm:text-6xl bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">
-            Rsbuild + Solid + Postgres
+        <div class={css({
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minH: '100vh',
+          p: '4'
+        })}>
+          <h1 class={css({
+            fontSize: { base: '4xl', sm: '6xl' },
+            fontWeight: 'bold',
+            letterSpacing: 'tight',
+            color: 'transparent',
+            mb: '8',
+            bgGradient: 'to-r',
+            gradientFrom: 'indigo.400',
+            gradientTo: 'cyan.400',
+            bgClip: 'text',
+          })}>
+            Inventory Manager
           </h1>
           <Auth />
         </div>

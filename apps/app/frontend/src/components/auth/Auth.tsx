@@ -1,7 +1,7 @@
 import { createSignal, Show } from "solid-js";
 import { startAuthentication } from "@simplewebauthn/browser";
-import { Button } from "../ui/Button";
-import { Input } from "../ui/Input";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "../../lib/auth";
 
 export default function Auth() {

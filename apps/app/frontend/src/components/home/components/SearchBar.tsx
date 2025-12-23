@@ -1,7 +1,7 @@
 import type { Component } from 'solid-js';
 import { For } from 'solid-js';
 import type { Genre, Location } from '../../../lib/types';
-import { Input } from '../../ui/Input';
+import { Input } from '@/components/ui/input';
 
 interface SearchBarProps {
     searchQuery: string;

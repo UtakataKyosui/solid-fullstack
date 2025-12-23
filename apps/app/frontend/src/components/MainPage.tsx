@@ -3,11 +3,13 @@ import { createSignal, createEffect, Show, For } from 'solid-js';
 import { startRegistration } from "@simplewebauthn/browser";
 import { useAuth } from '../lib/auth';
 import type { Passkey } from '../lib/types';
-import { Button } from './ui/Button';
+import { Button } from '@/components/ui/button';
 import Home from './home/Home';
 import GenreList from './GenreList';
 import LocationList from './LocationList';
 import { Trash2, HomeIcon, Tags, MapPin } from 'lucide-solid';
+import { css } from 'styled-system/css';
+import { Stack, Box, Flex } from 'styled-system/jsx';
 
 const MainPage: Component = () => {
     const { user, logout, fetchWithAuth } = useAuth();
@@ -25,19 +27,16 @@ const MainPage: Component = () => {
                 setPasskeys(data);
             } else {
                 console.error("Failed to fetch passkeys:", res.status, await res.text());
-                // Optionally set an error message or leave empty logic
             }
         } catch (err) {
             console.error("Failed to fetch passkeys network error", err);
         }
     };
 
-    // Fetch passkeys on mount
     createEffect(() => {
         fetchPasskeys();
     });
 
-    // Debug user object
     createEffect(() => {
         console.log("Current user state:", user());
     });
@@ -51,9 +50,7 @@ const MainPage: Component = () => {
             if (!startRes.ok) throw new Error("Failed to start passkey registration");
 
             const startData = await startRes.json();
-
             const opts = startData.challenge.publicKey ? startData.challenge.publicKey : startData.challenge;
-
             const attestationResponse = await startRegistration(opts);
 
             const finishRes = await fetchWithAuth("/api/auth/passkeys/register/finish", {
@@ -107,108 +104,169 @@ const MainPage: Component = () => {
         }
     };
 
+    const tabButtonClass = (isActive: boolean) => css({
+        px: { base: '3', sm: '4' },
+        py: '2',
+        display: 'flex',
+        alignItems: 'center',
+        gap: { base: '1', sm: '2' },
+        transition: 'colors',
+        whiteSpace: 'nowrap',
+        borderBottom: isActive ? '2px solid' : 'none',
+        borderColor: isActive ? 'blue.500' : 'transparent',
+        color: isActive ? 'blue.500' : 'slate.400',
+        _hover: { color: isActive ? 'blue.500' : 'white' }
+    });
+
     return (
-        <div class="p-4 sm:p-8">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
-                <h1 class="text-xl sm:text-2xl font-bold">Home Organization</h1>
-                <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
-                    <span class="text-sm sm:text-base truncate">Welcome, {user()?.name}</span>
-                    <button
+        <Box p={{ base: '4', sm: '8' }}>
+            <Flex
+                direction={{ base: 'column', sm: 'row' }}
+                justify="space-between"
+                align={{ base: 'start', sm: 'center' }}
+                mb={{ base: '6', sm: '8' }}
+                gap="4">
+                <h1 class={css({ fontSize: { base: 'xl', sm: '2xl' }, fontWeight: 'bold' })}>
+                    Home Organization
+                </h1>
+                <Flex align="center" gap={{ base: '2', sm: '4' }} w={{ base: 'full', sm: 'auto' }}>
+                    <span class={css({ fontSize: { base: 'sm', sm: 'base' }, truncate: true })}>
+                        Welcome, {user()?.name}
+                    </span>
+                    <Button
                         onClick={logout}
-                        class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 rounded text-white hover:bg-red-700 text-sm sm:text-base whitespace-nowrap"
+                        size={{ base: 'sm', sm: 'md' }}
+                        variant="outline"
+                        class={css({ bg: 'red.600!', color: 'white!', whiteSpace: 'nowrap', _hover: { bg: 'red.700!' } })}
                     >
                         Logout
-                    </button>
-                </div>
-            </div>
+                    </Button>
+                </Flex>
+            </Flex>
 
-            <div class="flex gap-1 sm:gap-2 mb-4 sm:mb-6 border-b border-slate-700 overflow-x-auto">
-                <button
-                    onClick={() => setActiveTab('home')}
-                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'home'
-                            ? 'border-b-2 border-blue-500 text-blue-500'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                >
+            <Flex
+                gap={{ base: '1', sm: '2' }}
+                mb={{ base: '4', sm: '6' }}
+                borderBottomWidth="1px"
+                borderColor="slate.700"
+                overflowX="auto"
+            >
+                <button onClick={() => setActiveTab('home')} class={tabButtonClass(activeTab() === 'home')}>
                     <HomeIcon size={18} />
-                    <span class="hidden sm:inline">ホーム</span>
+                    <span class={css({ display: { base: 'none', sm: 'inline' } })}>ホーム</span>
                 </button>
-                <button
-                    onClick={() => setActiveTab('genres')}
-                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'genres'
-                            ? 'border-b-2 border-blue-500 text-blue-500'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                >
+                <button onClick={() => setActiveTab('genres')} class={tabButtonClass(activeTab() === 'genres')}>
                     <Tags size={18} />
-                    <span class="hidden sm:inline">ジャンル</span>
+                    <span class={css({ display: { base: 'none', sm: 'inline' } })}>ジャンル</span>
                 </button>
-                <button
-                    onClick={() => setActiveTab('locations')}
-                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'locations'
-                            ? 'border-b-2 border-blue-500 text-blue-500'
-                            : 'text-slate-400 hover:text-white'
-                        }`}
-                >
+                <button onClick={() => setActiveTab('locations')} class={tabButtonClass(activeTab() === 'locations')}>
                     <MapPin size={18} />
-                    <span class="hidden sm:inline">場所</span>
+                    <span class={css({ display: { base: 'none', sm: 'inline' } })}>場所</span>
                 </button>
-            </div>
+            </Flex>
 
             <Show when={activeTab() === 'home'}>
-                <div class="mb-6 sm:mb-8 p-3 sm:p-4 bg-slate-800 rounded-lg">
-                    <h3 class="text-lg font-medium text-white mb-4">Security</h3>
+                <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="lg">
+                    <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', color: 'white', mb: '4' })}>
+                        Security
+                    </h3>
 
-                    <div class="mb-4">
-                        <h4 class="text-sm font-medium text-slate-400 mb-2">Registered Passkeys</h4>
-                        <div class="space-y-2">
-                            <For each={passkeys()}>
-                                {(pk) => (
-                                    <div class="flex items-center justify-between p-3 bg-slate-900 rounded border border-slate-700">
-                                        <div>
-                                            <div class="font-medium text-white">{pk.name}</div>
-                                            <div class="text-xs text-slate-500">Last used: {new Date(pk.last_used_at).toLocaleDateString()}</div>
-                                        </div>
-                                        <div class="flex items-center gap-4">
-                                            <div class="text-xs text-slate-500">
-                                                Added: {new Date(pk.created_at).toLocaleDateString()}
-                                            </div>
-                                            <button
-                                                onClick={() => deletePasskey(pk.id)}
-                                                class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition-colors"
-                                                title="Delete passkey"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        </div>
+                    <Stack gap="4" mb="4">
+                        <Box>
+                            <h4 class={css({ fontSize: 'sm', fontWeight: 'medium', color: 'slate.400', mb: '2' })}>
+                                Registered Passkeys
+                            </h4>
+                            <Stack gap="2">
+                                <For each={passkeys()}>
+                                    {(pk) => (
+                                        <Flex
+                                            align="center"
+                                            justify="space-between"
+                                            p="3"
+                                            bg="slate.900"
+                                            rounded="md"
+                                            borderWidth="1px"
+                                            borderColor="slate.700"
+                                        >
+                                            <Box>
+                                                <div class={css({ fontWeight: 'medium', color: 'white' })}>
+                                                    {pk.name}
+                                                </div>
+                                                <div class={css({ fontSize: 'xs', color: 'slate.500' })}>
+                                                    Last used: {new Date(pk.last_used_at).toLocaleDateString()}
+                                                </div>
+                                            </Box>
+                                            <Flex align="center" gap="4">
+                                                <div class={css({ fontSize: 'xs', color: 'slate.500' })}>
+                                                    Added: {new Date(pk.created_at).toLocaleDateString()}
+                                                </div>
+                                                <button
+                                                    onClick={() => deletePasskey(pk.id)}
+                                                    class={css({
+                                                        p: '2',
+                                                        color: 'slate.400',
+                                                        _hover: { color: 'red.400', bg: 'slate.800' },
+                                                        rounded: 'md',
+                                                        transition: 'colors'
+                                                    })}
+                                                    title="Delete passkey"
+                                                >
+                                                    <Trash2 size={16} />
+                                                </button>
+                                            </Flex>
+                                        </Flex>
+                                    )}
+                                </For>
+                                <Show when={passkeys().length === 0}>
+                                    <div class={css({ color: 'slate.500', fontSize: 'sm', fontStyle: 'italic' })}>
+                                        No passkeys registered
                                     </div>
-                                )}
-                            </For>
-                            <Show when={passkeys().length === 0}>
-                                <div class="text-slate-500 text-sm italic">No passkeys registered</div>
-                            </Show>
-                        </div>
-                    </div>
+                                </Show>
+                            </Stack>
+                        </Box>
+                    </Stack>
 
-                    <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                        <Button onClick={registerPasskey} variant="outline" class="border-dashed w-full sm:w-auto">
+                    <Flex
+                        mt="4"
+                        pt="4"
+                        borderTopWidth="1px"
+                        borderColor="slate.700"
+                        justify="space-between"
+                        align="center"
+                    >
+                        <Button
+                            onClick={registerPasskey}
+                            variant="outline"
+                            class={css({ borderStyle: 'dashed', w: { base: 'full', sm: 'auto' } })}
+                        >
                             Register New Passkey
                         </Button>
 
                         <button
                             onClick={deleteAccount}
-                            class="text-xs text-red-500 hover:text-red-400 underline"
+                            class={css({
+                                fontSize: 'xs',
+                                color: 'red.500',
+                                _hover: { color: 'red.400' },
+                                textDecoration: 'underline'
+                            })}
                         >
                             Delete Account
                         </button>
-                    </div>
+                    </Flex>
 
                     <Show when={message()}>
-                        <div class={`mt-2 p-2 rounded text-sm ${message().includes("fail") || message().includes("Error") ? "text-red-400" : "text-emerald-400"}`}>
+                        <div class={css({
+                            mt: '2',
+                            p: '2',
+                            rounded: 'md',
+                            fontSize: 'sm',
+                            color: message().includes("fail") || message().includes("Error") ? 'red.400' : 'emerald.400'
+                        })}>
                             {message()}
                         </div>
                     </Show>
-                </div>
+                </Box>
             </Show>
 
             <Show when={activeTab() === 'home'}>
@@ -220,7 +278,7 @@ const MainPage: Component = () => {
             <Show when={activeTab() === 'locations'}>
                 <LocationList />
             </Show>
-        </div>
+        </Box>
     );
 };
 
