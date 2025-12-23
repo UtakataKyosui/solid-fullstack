@@ -5,12 +5,15 @@ import { useAuth } from '../lib/auth';
 import type { Passkey } from '../lib/types';
 import { Button } from './ui/Button';
 import Home from './home/Home';
-import { Trash2 } from 'lucide-solid';
+import GenreList from './GenreList';
+import LocationList from './LocationList';
+import { Trash2, HomeIcon, Tags, MapPin } from 'lucide-solid';
 
 const MainPage: Component = () => {
     const { user, logout, fetchWithAuth } = useAuth();
     const [message, setMessage] = createSignal("");
     const [passkeys, setPasskeys] = createSignal<Passkey[]>([]);
+    const [activeTab, setActiveTab] = createSignal<'home' | 'genres' | 'locations'>('home');
 
     const fetchPasskeys = async () => {
         try {
@@ -119,6 +122,39 @@ const MainPage: Component = () => {
                 </div>
             </div>
 
+            <div class="flex gap-2 mb-6 border-b border-slate-700">
+                <button
+                    onClick={() => setActiveTab('home')}
+                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'home'
+                            ? 'border-b-2 border-blue-500 text-blue-500'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                >
+                    <HomeIcon size={18} />
+                    ホーム
+                </button>
+                <button
+                    onClick={() => setActiveTab('genres')}
+                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'genres'
+                            ? 'border-b-2 border-blue-500 text-blue-500'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                >
+                    <Tags size={18} />
+                    ジャンル
+                </button>
+                <button
+                    onClick={() => setActiveTab('locations')}
+                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'locations'
+                            ? 'border-b-2 border-blue-500 text-blue-500'
+                            : 'text-slate-400 hover:text-white'
+                        }`}
+                >
+                    <MapPin size={18} />
+                    場所
+                </button>
+            </div>
+
             <div class="mb-8 p-4 bg-slate-800 rounded-lg">
                 <h3 class="text-lg font-medium text-white mb-4">Security</h3>
 
@@ -173,9 +209,15 @@ const MainPage: Component = () => {
                 </Show>
             </div>
 
-            <div>
+            <Show when={activeTab() === 'home'}>
                 <Home />
-            </div>
+            </Show>
+            <Show when={activeTab() === 'genres'}>
+                <GenreList />
+            </Show>
+            <Show when={activeTab() === 'locations'}>
+                <LocationList />
+            </Show>
         </div>
     );
 };

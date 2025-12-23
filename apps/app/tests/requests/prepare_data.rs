@@ -1,8 +1,8 @@
 use app::{models::users, views::auth::LoginResponse};
 use axum::http::{HeaderName, HeaderValue};
 use loco_rs::{app::AppContext, TestServer};
+use uuid::Uuid;
 
-const USER_EMAIL: &str = "test@loco.com";
 const USER_PASSWORD: &str = "1234";
 
 pub struct LoggedInUser {
@@ -11,20 +11,27 @@ pub struct LoggedInUser {
 }
 
 pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedInUser {
+    let random_email = format!("test_{}@loco.com", Uuid::new_v4());
+
     let register_payload = serde_json::json!({
         "name": "loco",
-        "email": USER_EMAIL,
+        "email": random_email,
         "password": USER_PASSWORD
     });
 
     //Creating a new user
-    request
+    let res = request
         .post("/api/auth/register")
         .json(&register_payload)
         .await;
-    let user = users::Model::find_by_email(&ctx.db, USER_EMAIL)
+    
+    if res.status_code() != 200 {
+        panic!("Register failed: {}", res.text());
+    }
+
+    let user = users::Model::find_by_email(&ctx.db, &random_email)
         .await
-        .unwrap();
+        .expect("User should exist after registration");
 
     let verify_payload = serde_json::json!({
         "token": user.email_verification_token,
@@ -35,7 +42,7 @@ pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedIn
     let response = request
         .post("/api/auth/login")
         .json(&serde_json::json!({
-            "email": USER_EMAIL,
+            "email": random_email,
             "password": USER_PASSWORD
         }))
         .await;
@@ -43,7 +50,7 @@ pub async fn init_user_login(request: &TestServer, ctx: &AppContext) -> LoggedIn
     let login_response: LoginResponse = serde_json::from_str(&response.text()).unwrap();
 
     LoggedInUser {
-        user: users::Model::find_by_email(&ctx.db, USER_EMAIL)
+        user: users::Model::find_by_email(&ctx.db, &random_email)
             .await
             .unwrap(),
         token: login_response.token,
