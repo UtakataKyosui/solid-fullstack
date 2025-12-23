@@ -23,9 +23,9 @@ const Home: Component = () => {
         return res.json();
     }
 
-    const [genres] = createResource<Genre[]>(() => "/api/genres", fetcher);
-    const [locations, { refetch: refetchLocations }] = createResource<Location[]>(() => "/api/locations", fetcher);
-    const [items, { refetch: refetchItems }] = createResource<Item[]>(() => "/api/items", fetcher);
+    const [genres] = createResource<Genre[]>(() => fetcher<Genre>("/api/genres"));
+    const [locations, { refetch: refetchLocations }] = createResource<Location[]>(() => fetcher<Location>("/api/locations"));
+    const [items, { refetch: refetchItems }] = createResource<Item[]>(() => fetcher<Item>("/api/items"));
 
     const filteredItems = createMemo(() => {
         const _items = items() || [];
