@@ -39,43 +39,44 @@ tasks:
       - 'tests/**/*'
 
   # Docker Compose management
-  docker:build:
+  docker-build:
     command: 'docker-compose -f docker-compose.dev.yml build'
     local: true
     description: 'Build Docker images for development'
 
-  docker:up:
+  docker-up:
     command: 'docker-compose -f docker-compose.dev.yml up'
     local: true
     description: 'Start all services in Docker (Postgres, Backend, Frontend)'
 
-  docker:down:
+  docker-down:
     command: 'docker-compose -f docker-compose.dev.yml down'
     local: true
     description: 'Stop all Docker services'
 
-  docker:down:volumes:
+  docker-down-volumes:
     command: 'docker-compose -f docker-compose.dev.yml down -v'
     local: true
     description: 'Stop all Docker services and remove volumes (clean slate)'
 
-  docker:logs:
+  docker-logs:
     command: 'docker-compose -f docker-compose.dev.yml logs -f'
     local: true
     description: 'Follow logs from all Docker services'
 
-  docker:logs:backend:
+  docker-logs-backend:
     command: 'docker-compose -f docker-compose.dev.yml logs -f backend'
     local: true
     description: 'Follow backend logs'
 
-  docker:migrate:
+  docker-migrate:
     command: 'docker-compose -f docker-compose.dev.yml exec backend cargo loco db migrate'
     local: true
     description: 'Run database migrations in Docker'
 
-  docker:reset:
+  docker-reset:
     command: 'docker-compose -f docker-compose.dev.yml exec backend cargo loco db reset'
     local: true
     description: 'Reset database in Docker'
+
 
