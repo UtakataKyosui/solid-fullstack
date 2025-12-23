@@ -1,4 +1,5 @@
-import { Component, createSignal, For } from 'solid-js';
+import type { Component } from 'solid-js';
+import { createSignal, For } from 'solid-js';
 import { useAuth } from '../../../lib/auth';
 import type { Genre, Location } from '../../../lib/types';
 import { Dialog } from '@/components/ui/dialog';
@@ -63,7 +64,11 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
     return (
         <>
             <Button onClick={() => setIsOpen(true)}>Add Item</Button>
-            <Dialog.Root open={isOpen()} onOpenChange={(e) => setIsOpen(e.open)}>
+            <Dialog.Root
+                open={isOpen()}
+                onOpenChange={(e) => setIsOpen(e.open)}
+                closeOnInteractOutside={true}
+            >
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
                     <Dialog.Content>
