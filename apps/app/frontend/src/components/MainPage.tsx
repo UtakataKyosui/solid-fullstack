@@ -1,8 +1,8 @@
 import type { Component } from 'solid-js';
 import { createSignal, createEffect, Show, For } from 'solid-js';
-import { startRegistration } from "@simplewebauthn/browser";
+// import { startRegistration } from "@simplewebauthn/browser";
 import { useAuth } from '../lib/auth';
-import type { Passkey } from '../lib/types';
+// import type { Passkey } from '../lib/types';
 import { Button } from '@/components/ui/button';
 import Home from './home/Home';
 import GenreList from './GenreList';
@@ -13,10 +13,12 @@ import { Stack, Box, Flex } from 'styled-system/jsx';
 
 const MainPage: Component = () => {
     const { user, logout, fetchWithAuth } = useAuth();
-    const [message, setMessage] = createSignal("");
-    const [passkeys, setPasskeys] = createSignal<Passkey[]>([]);
+    // const [message, setMessage] = createSignal("");
+    // const [passkeys, setPasskeys] = createSignal<Passkey[]>([]);
     const [activeTab, setActiveTab] = createSignal<'home' | 'genres' | 'locations'>('home');
 
+    // TODO: Re-enable authentication features in separate branch
+    /*
     const fetchPasskeys = async () => {
         try {
             console.log("Fetching passkeys...");
@@ -36,11 +38,13 @@ const MainPage: Component = () => {
     createEffect(() => {
         fetchPasskeys();
     });
+    */
 
     createEffect(() => {
         console.log("Current user state:", user());
     });
 
+    /*
     const registerPasskey = async () => {
         try {
             const startRes = await fetchWithAuth("/api/auth/passkeys/register/start", {
@@ -103,6 +107,7 @@ const MainPage: Component = () => {
             console.error(err);
         }
     };
+    */
 
     const tabButtonClass = (isActive: boolean) => css({
         px: { base: '3', sm: '4' },
@@ -166,6 +171,7 @@ const MainPage: Component = () => {
             </Flex>
 
             <Show when={activeTab() === 'home'}>
+                {/* TODO: Re-enable Security section in separate authentication branch
                 <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="lg">
                     <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', color: 'white', mb: '4' })}>
                         Security
@@ -267,6 +273,7 @@ const MainPage: Component = () => {
                         </div>
                     </Show>
                 </Box>
+                */}
             </Show>
 
             <Show when={activeTab() === 'home'}>
