@@ -1,5 +1,5 @@
 # Development Dockerfile - builds and watches on container start
-FROM rust:nightly-slim
+FROM rustlang/rust:nightly-slim
 
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
