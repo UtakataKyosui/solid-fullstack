@@ -2,33 +2,52 @@ import type { Component } from 'solid-js';
 import { For } from 'solid-js';
 import type { Genre, Location } from '../../../lib/types';
 import { Input } from '@/components/ui/input';
+import { css } from 'styled-system/css';
+import { Flex, Box } from 'styled-system/jsx';
 
 interface SearchBarProps {
     searchQuery: string;
-    setSearchQuery: (query: string) => void;
-    genreFilter: string;
-    setGenreFilter: (genreId: string) => void;
-    locationFilter: string;
-    setLocationFilter: (locationId: string) => void;
+    onSearchChange: (query: string) => void;
     genres: Genre[];
     locations: Location[];
+    selectedGenre: string;
+    selectedLocation: string;
+    onGenreChange: (genreId: string) => void;
+    onLocationChange: (locationId: string) => void;
 }
 
 export const SearchBar: Component<SearchBarProps> = (props) => {
     return (
-        <div class="flex flex-col md:flex-row gap-4">
-            <div class="flex-1">
+        <Flex
+            direction={{ base: 'column', md: 'row' }}
+            gap={{ base: '2', sm: '3', md: '4' }}
+        >
+            <Box flex="1">
                 <Input
                     placeholder="Search items..."
                     value={props.searchQuery}
-                    onInput={(e) => props.setSearchQuery(e.currentTarget.value)}
+                    onInput={(e) => props.onSearchChange(e.currentTarget.value)}
                 />
-            </div>
-            <div class="flex gap-4">
+            </Box>
+            <Flex gap={{ base: '2', sm: '3', md: '4' }}>
                 <select
-                    class="h-10 px-3 rounded-md bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    value={props.genreFilter}
-                    onChange={(e) => props.setGenreFilter(e.currentTarget.value)}
+                    class={css({
+                        h: '10',
+                        px: '3',
+                        rounded: 'md',
+                        bg: 'slate.950',
+                        borderWidth: '1px',
+                        borderColor: 'slate.800',
+                        fontSize: 'sm',
+                        color: 'white',
+                        _focus: {
+                            outlineWidth: '2px',
+                            outlineOffset: '2px',
+                            outlineColor: 'blue.500'
+                        }
+                    })}
+                    value={props.selectedGenre}
+                    onChange={(e) => props.onGenreChange(e.currentTarget.value)}
                 >
                     <option value="">All Genres</option>
                     <For each={props.genres}>
@@ -37,9 +56,23 @@ export const SearchBar: Component<SearchBarProps> = (props) => {
                 </select>
 
                 <select
-                    class="h-10 px-3 rounded-md bg-slate-950 border border-slate-800 text-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                    value={props.locationFilter}
-                    onChange={(e) => props.setLocationFilter(e.currentTarget.value)}
+                    class={css({
+                        h: '10',
+                        px: '3',
+                        rounded: 'md',
+                        bg: 'slate.950',
+                        borderWidth: '1px',
+                        borderColor: 'slate.800',
+                        fontSize: 'sm',
+                        color: 'white',
+                        _focus: {
+                            outlineWidth: '2px',
+                            outlineOffset: '2px',
+                            outlineColor: 'blue.500'
+                        }
+                    })}
+                    value={props.selectedLocation}
+                    onChange={(e) => props.onLocationChange(e.currentTarget.value)}
                 >
                     <option value="">All Locations</option>
                     <option value="unassigned">Unassigned</option>
@@ -47,7 +80,7 @@ export const SearchBar: Component<SearchBarProps> = (props) => {
                         {(location) => <option value={location.id.toString()}>{location.name}</option>}
                     </For>
                 </select>
-            </div>
-        </div>
+            </Flex>
+        </Flex>
     );
 };

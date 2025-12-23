@@ -6,6 +6,8 @@ import { UnassignedItems, LocationCard, ManageGenresDialog } from './components/
 import { SearchBar } from './components/SearchBar';
 import { AddItemDialog } from './components/AddItemDialog';
 import { AddLocationDialog } from './components/AddLocationDialog';
+import { css } from 'styled-system/css';
+import { Stack, Box, Flex, Grid } from 'styled-system/jsx';
 
 const Home: Component = () => {
     const { fetchWithAuth } = useAuth();
@@ -21,9 +23,9 @@ const Home: Component = () => {
         return res.json();
     }
 
-    const [genres] = createResource<Genre[]>(() => "/api/genres/", fetcher);
-    const [locations, { refetch: refetchLocations }] = createResource<Location[]>(() => "/api/locations/", fetcher);
-    const [items, { refetch: refetchItems }] = createResource<Item[]>(() => "/api/items/", fetcher);
+    const [genres] = createResource<Genre[]>(() => "/api/genres", fetcher);
+    const [locations, { refetch: refetchLocations }] = createResource<Location[]>(() => "/api/locations", fetcher);
+    const [items, { refetch: refetchItems }] = createResource<Item[]>(() => "/api/items", fetcher);
 
     const filteredItems = createMemo(() => {
         const _items = items() || [];
@@ -40,62 +42,68 @@ const Home: Component = () => {
     });
 
     return (
-        <div class="space-y-6">
-            <header class="flex flex-col gap-4 p-4 bg-slate-900 rounded-lg border border-slate-800">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h2 class="text-xl font-bold">Inventory Management</h2>
-                        <p class="text-slate-400 text-sm">
-                            {(items() || []).length} items, {(locations() || []).length} locations
-                        </p>
-                    </div>
-                    <div class="flex gap-2">
+        <Stack gap={{ base: '4', sm: '6' }}>
+            <Box
+                as="header"
+                p={{ base: '3', sm: '4' }}
+                bg="slate.900"
+                rounded="lg"
+                borderWidth="1px"
+                borderColor="slate.800"
+            >
+                <Stack gap="4">
+                    <Flex justify="space-between" align="center">
+                        <Box>
+                            <h2 class={css({ fontSize: { base: 'lg', sm: 'xl' }, fontWeight: 'bold' })}>
+                                Inventory Management
+                            </h2>
+                            <p class={css({ color: 'slate.400', fontSize: 'sm' })}>
+                                {(items() || []).length} items, {(locations() || []).length} locations
+                            </p>
+                        </Box>
                         <ManageGenresDialog />
-                        <AddLocationDialog
-                            genres={genres() || []}
-                            onSuccess={refetchLocations}
-                        />
-                        <AddItemDialog
-                            genres={genres() || []}
-                            locations={locations() || []}
-                            onSuccess={refetchItems}
-                        />
-                    </div>
-                </div>
-                <SearchBar
-                    searchQuery={searchQuery()}
-                    setSearchQuery={setSearchQuery}
-                    genreFilter={genreFilter()}
-                    setGenreFilter={setGenreFilter}
-                    locationFilter={locationFilter()}
-                    setLocationFilter={setLocationFilter}
-                    genres={genres() || []}
-                    locations={locations() || []}
-                />
-            </header>
+                    </Flex>
 
-            <main class="space-y-6">
-                <UnassignedItems items={filteredItems().filter(i => !i.location_id)} />
+                    <SearchBar
+                        searchQuery={searchQuery()}
+                        onSearchChange={setSearchQuery}
+                        genres={genres() || []}
+                        locations={locations() || []}
+                        selectedGenre={genreFilter()}
+                        selectedLocation={locationFilter()}
+                        onGenreChange={setGenreFilter}
+                        onLocationChange={setLocationFilter}
+                    />
+                </Stack>
+            </Box>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <For each={locations()}>
-                        {(location) => {
-                            const locationItems = filteredItems().filter(i => i.location_id === location.id);
+            <Grid columns={{ base: 1, md: 2 }} gap={{ base: '3', sm: '4' }}>
+                <AddItemDialog onSuccess={refetchItems} />
+                <AddLocationDialog onSuccess={refetchLocations} />
+            </Grid>
 
-                            if (locationItems.length === 0 && (searchQuery() || genreFilter() || locationFilter())) {
-                                return null;
-                            }
-                            return (
-                                <LocationCard
-                                    location={location}
-                                    items={locationItems}
-                                />
-                            );
-                        }}
+            <Show when={locationFilter() === "unassigned"}>
+                <UnassignedItems items={filteredItems()} onRefetch={refetchItems} />
+            </Show>
+
+            <Show when={locationFilter() !== "unassigned"}>
+                <Grid columns={{ base: 1, md: 2, lg: 3 }} gap={{ base: '3', sm: '4' }}>
+                    <For each={locations()} fallback={
+                        <Box color="slate.500" fontSize="sm">
+                            No locations found. Create one to get started.
+                        </Box>
+                    }>
+                        {(loc) => (
+                            <LocationCard
+                                location={loc}
+                                items={(items() || []).filter(item => item.location_id === loc.id)}
+                                onRefetch={refetchItems}
+                            />
+                        )}
                     </For>
-                </div>
-            </main>
-        </div>
+                </Grid>
+            </Show>
+        </Stack>
     );
 };
 

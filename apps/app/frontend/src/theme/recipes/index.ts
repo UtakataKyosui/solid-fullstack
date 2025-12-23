@@ -1,3 +1,4 @@
+import { select } from "./select";
 import { absoluteCenter } from './absolute-center'
 import { button } from './button'
 import { dialog } from './dialog'
@@ -23,6 +24,7 @@ export const recipes = {
   icon,
   input,
   spinner,
+  select
 }
 
 export const slotRecipes = {
