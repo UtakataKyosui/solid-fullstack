@@ -17,11 +17,19 @@ interface AddItemDialogProps {
 export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
     const { fetchWithAuth } = useAuth();
     const [isOpen, setIsOpen] = createSignal(false);
-    const [name, setName] = createSignal("");
-    const [description, setDescription] = createSignal("");
-    const [genreId, setGenreId] = createSignal("");
-    const [locationId, setLocationId] = createSignal("");
     const [loading, setLoading] = createSignal(false);
+
+    const [name, setName] = createSignal('');
+    const [description, setDescription] = createSignal('');
+    const [genreId, setGenreId] = createSignal('');
+    const [locationId, setLocationId] = createSignal('unassigned');
+
+    const resetForm = () => {
+        setName('');
+        setDescription('');
+        setGenreId('');
+        setLocationId('unassigned');
+    };
 
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
@@ -29,33 +37,24 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
 
         setLoading(true);
         try {
-            const payload: any = {
+            const body = {
                 name: name(),
-                description: description(),
+                description: description() || null,
                 genre_id: parseInt(genreId()),
+                location_id: locationId() === 'unassigned' ? null : parseInt(locationId())
             };
 
-            if (locationId() && locationId() !== "unassigned") {
-                payload.location_id = parseInt(locationId());
-            }
-
-            const res = await fetchWithAuth("/api/items", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+            const res = await fetchWithAuth('/api/items', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {
-                props.onSuccess();
+                resetForm();
                 setIsOpen(false);
-                // Reset form
-                setName("");
-                setDescription("");
-                setGenreId("");
-                setLocationId("");
+                props.onSuccess();
             }
-        } catch (err) {
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -72,126 +71,107 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
                     <Dialog.Content>
-                        <Stack gap="4" p="6">
-                            <Dialog.Title>Add New Item</Dialog.Title>
-                            <Dialog.Description>
-                                Create a new item to track in your inventory
-                            </Dialog.Description>
+                        <Dialog.Title>Add New Item</Dialog.Title>
+                        <Dialog.Description>
+                            Create a new item to track in your inventory
+                        </Dialog.Description>
 
-                            <form onSubmit={handleSubmit}>
-                                <Stack gap="4">
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Name
-                                        </label>
-                                        <Input
-                                            value={name()}
-                                            onInput={(e) => setName(e.currentTarget.value)}
-                                            required
-                                            placeholder="Item name"
-                                        />
-                                    </Box>
+                        <form onSubmit={handleSubmit}>
+                            <Stack gap="4">
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Name
+                                    </label>
+                                    <Input
+                                        value={name()}
+                                        onInput={(e) => setName(e.currentTarget.value)}
+                                        required
+                                        placeholder="Item name"
+                                    />
+                                </Box>
 
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Description
-                                        </label>
-                                        <Input
-                                            value={description()}
-                                            onInput={(e) => setDescription(e.currentTarget.value)}
-                                            placeholder="Optional description"
-                                        />
-                                    </Box>
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Description
+                                    </label>
+                                    <Input
+                                        value={description()}
+                                        onInput={(e) => setDescription(e.currentTarget.value)}
+                                        placeholder="Optional description"
+                                    />
+                                </Box>
 
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Genre
-                                        </label>
-                                        <select
-                                            class={css({
-                                                w: 'full',
-                                                h: '10',
-                                                px: '3',
-                                                rounded: 'md',
-                                                bg: 'slate.950',
-                                                borderWidth: '1px',
-                                                borderColor: 'slate.800',
-                                                fontSize: 'sm',
-                                                color: 'white',
-                                                _focus: { outlineColor: 'blue.500' }
-                                            })}
-                                            value={genreId()}
-                                            onChange={(e) => setGenreId(e.currentTarget.value)}
-                                            required
-                                        >
-                                            <option value="" disabled>Select a genre</option>
-                                            <For each={props.genres}>
-                                                {(genre) => <option value={genre.id}>{genre.name}</option>}
-                                            </For>
-                                        </select>
-                                    </Box>
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Genre
+                                    </label>
+                                    <select
+                                        class={css({
+                                            w: 'full',
+                                            h: '10',
+                                            px: '3',
+                                            rounded: 'md',
+                                            bg: 'slate.950',
+                                            borderWidth: '1px',
+                                            borderColor: 'slate.800',
+                                            fontSize: 'sm',
+                                            color: 'white',
+                                            _focus: { outlineColor: 'blue.500' }
+                                        })}
+                                        value={genreId()}
+                                        onChange={(e) => setGenreId(e.currentTarget.value)}
+                                        required
+                                    >
+                                        <option value="" disabled>Select a genre</option>
+                                        <For each={props.genres}>
+                                            {(genre) => <option value={genre.id}>{genre.name}</option>}
+                                        </For>
+                                    </select>
+                                </Box>
 
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Initial Location
-                                        </label>
-                                        <select
-                                            class={css({
-                                                w: 'full',
-                                                h: '10',
-                                                px: '3',
-                                                rounded: 'md',
-                                                bg: 'slate.950',
-                                                borderWidth: '1px',
-                                                borderColor: 'slate.800',
-                                                fontSize: 'sm',
-                                                color: 'white',
-                                                _focus: { outlineColor: 'blue.500' }
-                                            })}
-                                            value={locationId()}
-                                            onChange={(e) => setLocationId(e.currentTarget.value)}
-                                        >
-                                            <option value="unassigned">Unassigned</option>
-                                            <For each={props.locations}>
-                                                {(location) => <option value={location.id}>{location.name}</option>}
-                                            </For>
-                                        </select>
-                                    </Box>
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Initial Location
+                                    </label>
+                                    <select
+                                        class={css({
+                                            w: 'full',
+                                            h: '10',
+                                            px: '3',
+                                            rounded: 'md',
+                                            bg: 'slate.950',
+                                            borderWidth: '1px',
+                                            borderColor: 'slate.800',
+                                            fontSize: 'sm',
+                                            color: 'white',
+                                            _focus: { outlineColor: 'blue.500' }
+                                        })}
+                                        value={locationId()}
+                                        onChange={(e) => setLocationId(e.currentTarget.value)}
+                                    >
+                                        <option value="unassigned">Unassigned</option>
+                                        <For each={props.locations}>
+                                            {(location) => <option value={location.id}>{location.name}</option>}
+                                        </For>
+                                    </select>
+                                </Box>
 
-                                    <Box class={css({ display: 'flex', justifyContent: 'flex-end', pt: '4' })}>
-                                        <Button type="submit" loading={loading()}>
-                                            {loading() ? "Creating..." : "Create Item"}
-                                        </Button>
-                                    </Box>
-                                </Stack>
-                            </form>
+                                <Box class={css({ display: 'flex', justifyContent: 'flex-end', gap: '2', pt: '4' })}>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" loading={loading()}>
+                                        {loading() ? "Creating..." : "Create Item"}
+                                    </Button>
+                                </Box>
+                            </Stack>
+                        </form>
 
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setIsOpen(false);
-                                }}
-                                type="button"
-                                class={css({
-                                    position: 'absolute',
-                                    top: '4',
-                                    right: '4',
-                                    p: '2',
-                                    color: 'slate.400',
-                                    _hover: { color: 'white', bg: 'slate.800' },
-                                    rounded: 'md',
-                                    transition: 'colors',
-                                    cursor: 'pointer',
-                                    zIndex: '10'
-                                })}
-                                aria-label="Close dialog"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            </button>
-                        </Stack>
+                        <Dialog.CloseTrigger />
                     </Dialog.Content>
                 </Dialog.Positioner>
             </Dialog.Root>

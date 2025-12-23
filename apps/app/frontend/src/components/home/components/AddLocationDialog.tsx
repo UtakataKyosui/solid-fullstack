@@ -16,10 +16,17 @@ interface AddLocationDialogProps {
 export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
     const { fetchWithAuth } = useAuth();
     const [isOpen, setIsOpen] = createSignal(false);
-    const [name, setName] = createSignal("");
-    const [description, setDescription] = createSignal("");
-    const [genreId, setGenreId] = createSignal("");
     const [loading, setLoading] = createSignal(false);
+
+    const [name, setName] = createSignal('');
+    const [description, setDescription] = createSignal('');
+    const [genreId, setGenreId] = createSignal('');
+
+    const resetForm = () => {
+        setName('');
+        setDescription('');
+        setGenreId('');
+    };
 
     const handleSubmit = async (e: Event) => {
         e.preventDefault();
@@ -27,28 +34,23 @@ export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
 
         setLoading(true);
         try {
-            const payload = {
+            const body = {
                 name: name(),
-                description: description(),
-                genre_id: parseInt(genreId()),
+                description: description() || null,
+                genre_id: parseInt(genreId())
             };
 
-            const res = await fetchWithAuth("/api/locations", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
+            const res = await fetchWithAuth('/api/locations', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
             });
 
             if (res.ok) {
-                props.onSuccess();
+                resetForm();
                 setIsOpen(false);
-                // Reset form
-                setName("");
-                setDescription("");
-                setGenreId("");
+                props.onSuccess();
             }
-        } catch (err) {
-            console.error(err);
         } finally {
             setLoading(false);
         }
@@ -65,99 +67,80 @@ export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
                 <Dialog.Backdrop />
                 <Dialog.Positioner>
                     <Dialog.Content>
-                        <Stack gap="4" p="6">
-                            <Dialog.Title>Add New Location</Dialog.Title>
-                            <Dialog.Description>
-                                Create a new location for organizing your items
-                            </Dialog.Description>
+                        <Dialog.Title>Add New Location</Dialog.Title>
+                        <Dialog.Description>
+                            Create a new location for organizing your items
+                        </Dialog.Description>
 
-                            <form onSubmit={handleSubmit}>
-                                <Stack gap="4">
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Name
-                                        </label>
-                                        <Input
-                                            value={name()}
-                                            onInput={(e) => setName(e.currentTarget.value)}
-                                            required
-                                            placeholder="Location name"
-                                        />
-                                    </Box>
+                        <form onSubmit={handleSubmit}>
+                            <Stack gap="4">
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Location Name
+                                    </label>
+                                    <Input
+                                        value={name()}
+                                        onInput={(e) => setName(e.currentTarget.value)}
+                                        required
+                                        placeholder="e.g., Bookshelf A"
+                                    />
+                                </Box>
 
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Description
-                                        </label>
-                                        <Input
-                                            value={description()}
-                                            onInput={(e) => setDescription(e.currentTarget.value)}
-                                            placeholder="Optional description"
-                                        />
-                                    </Box>
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Description
+                                    </label>
+                                    <Input
+                                        value={description()}
+                                        onInput={(e) => setDescription(e.currentTarget.value)}
+                                        placeholder="e.g., Living room shelf"
+                                    />
+                                </Box>
 
-                                    <Box>
-                                        <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                            Genre
-                                        </label>
-                                        <select
-                                            class={css({
-                                                w: 'full',
-                                                h: '10',
-                                                px: '3',
-                                                rounded: 'md',
-                                                bg: 'slate.950',
-                                                borderWidth: '1px',
-                                                borderColor: 'slate.800',
-                                                fontSize: 'sm',
-                                                color: 'white',
-                                                _focus: { outlineColor: 'blue.500' }
-                                            })}
-                                            value={genreId()}
-                                            onChange={(e) => setGenreId(e.currentTarget.value)}
-                                            required
-                                        >
-                                            <option value="" disabled>Select a genre</option>
-                                            <For each={props.genres}>
-                                                {(genre) => <option value={genre.id}>{genre.name}</option>}
-                                            </For>
-                                        </select>
-                                    </Box>
+                                <Box>
+                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
+                                        Genre
+                                    </label>
+                                    <select
+                                        class={css({
+                                            w: 'full',
+                                            h: '10',
+                                            px: '3',
+                                            rounded: 'md',
+                                            bg: 'slate.950',
+                                            borderWidth: '1px',
+                                            borderColor: 'slate.800',
+                                            fontSize: 'sm',
+                                            color: 'white',
+                                            _focus: { outlineColor: 'blue.500' }
+                                        })}
+                                        value={genreId()}
+                                        onChange={(e) => setGenreId(e.currentTarget.value)}
+                                        required
+                                    >
+                                        <option value="" disabled>Select a genre</option>
+                                        <For each={props.genres}>
+                                            {(genre) => <option value={genre.id}>{genre.name}</option>}
+                                        </For>
+                                    </select>
+                                </Box>
 
-                                    <Box class={css({ display: 'flex', justifyContent: 'flex-end', pt: '4' })}>
-                                        <Button type="submit" loading={loading()}>
-                                            {loading() ? "Creating..." : "Create Location"}
-                                        </Button>
-                                    </Box>
-                                </Stack>
-                            </form>
+                                <Box class={css({ display: 'flex', justifyContent: 'flex-end', gap: '2', pt: '4' })}>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        Cancel
+                                    </Button>
+                                    <Button type="submit" loading={loading()}>
+                                        {loading() ? "Creating..." : "Create Location"}
+                                    </Button>
+                                </Box>
+                            </Stack>
+                        </form>
 
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    setIsOpen(false);
-                                }}
-                                type="button"
-                                class={css({
-                                    position: 'absolute',
-                                    top: '4',
-                                    right: '4',
-                                    p: '2',
-                                    color: 'slate.400',
-                                    _hover: { color: 'white', bg: 'slate.800' },
-                                    rounded: 'md',
-                                    transition: 'colors',
-                                    cursor: 'pointer',
-                                    zIndex: '10'
-                                })}
-                                aria-label="Close dialog"
-                            >
-                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M12 4L4 12M4 4L12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                                </svg>
-                            </button>
-                        </Stack>
+                        <Dialog.CloseTrigger />
                     </Dialog.Content>
                 </Dialog.Positioner>
             </Dialog.Root>
