@@ -20,13 +20,13 @@ tasks:
       - 'frontend/rsbuild.config.ts'
       - 'frontend/tsconfig.json'
 
+  # Development tasks (local)
   dev:
     command: 'cargo run --bin app-cli start'
     local: true
     inputs:
       - 'src/**/*'
       - 'config/**/*'
-    # Removed dep on build-frontend for dev as they run separately
 
   dev-frontend:
     command: 'cd frontend && deno task dev'
@@ -37,3 +37,45 @@ tasks:
     inputs:
       - 'src/**/*'
       - 'tests/**/*'
+
+  # Docker Compose management
+  docker:build:
+    command: 'docker-compose -f docker-compose.dev.yml build'
+    local: true
+    description: 'Build Docker images for development'
+
+  docker:up:
+    command: 'docker-compose -f docker-compose.dev.yml up'
+    local: true
+    description: 'Start all services in Docker (Postgres, Backend, Frontend)'
+
+  docker:down:
+    command: 'docker-compose -f docker-compose.dev.yml down'
+    local: true
+    description: 'Stop all Docker services'
+
+  docker:down:volumes:
+    command: 'docker-compose -f docker-compose.dev.yml down -v'
+    local: true
+    description: 'Stop all Docker services and remove volumes (clean slate)'
+
+  docker:logs:
+    command: 'docker-compose -f docker-compose.dev.yml logs -f'
+    local: true
+    description: 'Follow logs from all Docker services'
+
+  docker:logs:backend:
+    command: 'docker-compose -f docker-compose.dev.yml logs -f backend'
+    local: true
+    description: 'Follow backend logs'
+
+  docker:migrate:
+    command: 'docker-compose -f docker-compose.dev.yml exec backend cargo loco db migrate'
+    local: true
+    description: 'Run database migrations in Docker'
+
+  docker:reset:
+    command: 'docker-compose -f docker-compose.dev.yml exec backend cargo loco db reset'
+    local: true
+    description: 'Reset database in Docker'
+
