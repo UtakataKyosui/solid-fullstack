@@ -78,8 +78,15 @@ const Home: Component = () => {
             </Box>
 
             <Grid columns={{ base: 1, md: 2 }} gap={{ base: '3', sm: '4' }}>
-                <AddItemDialog onSuccess={refetchItems} />
-                <AddLocationDialog onSuccess={refetchLocations} />
+                <AddItemDialog
+                    genres={genres() || []}
+                    locations={locations() || []}
+                    onSuccess={refetchItems}
+                />
+                <AddLocationDialog
+                    genres={genres() || []}
+                    onSuccess={refetchLocations}
+                />
             </Grid>
 
             <Show when={locationFilter() === "unassigned"}>
