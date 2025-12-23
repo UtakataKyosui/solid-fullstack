@@ -1,4 +1,5 @@
-import { Component, JSX, Show } from "solid-js";
+import type { Component, JSX } from "solid-js";
+import { Show } from "solid-js";
 import { Portal } from "solid-js/web";
 import { X } from "lucide-solid";
 
@@ -21,7 +22,7 @@ export const Dialog: Component<DialogProps> = (props) => {
                     />
 
                     {/* Dialog Content */}
-                    <div class="relative z-10 w-full max-w-lg bg-slate-900 border border-slate-800 rounded-lg shadow-xl p-6 mx-4 animate-in fade-in zoom-in-95 duration-200">
+                    <div class="relative z-10 w-full max-w-lg bg-slate-900 border border-slate-800 rounded-lg shadow-xl p-4 sm:p-6 mx-2 sm:mx-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-200">
                         <div class="flex items-center justify-between mb-4">
                             <h3 class="text-lg font-semibold text-white">{props.title}</h3>
                             <button

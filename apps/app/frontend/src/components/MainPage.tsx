@@ -108,106 +108,108 @@ const MainPage: Component = () => {
     };
 
     return (
-        <div class="p-8">
-            <div class="flex justify-between items-center mb-8">
-                <h1 class="text-2xl font-bold">Home Organization</h1>
-                <div class="flex items-center gap-4">
-                    <span>Welcome, {user()?.name}</span>
+        <div class="p-4 sm:p-8">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+                <h1 class="text-xl sm:text-2xl font-bold">Home Organization</h1>
+                <div class="flex items-center gap-2 sm:gap-4 w-full sm:w-auto">
+                    <span class="text-sm sm:text-base truncate">Welcome, {user()?.name}</span>
                     <button
                         onClick={logout}
-                        class="px-4 py-2 bg-red-600 rounded text-white hover:bg-red-700"
+                        class="px-3 py-1.5 sm:px-4 sm:py-2 bg-red-600 rounded text-white hover:bg-red-700 text-sm sm:text-base whitespace-nowrap"
                     >
                         Logout
                     </button>
                 </div>
             </div>
 
-            <div class="flex gap-2 mb-6 border-b border-slate-700">
+            <div class="flex gap-1 sm:gap-2 mb-4 sm:mb-6 border-b border-slate-700 overflow-x-auto">
                 <button
                     onClick={() => setActiveTab('home')}
-                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'home'
+                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'home'
                             ? 'border-b-2 border-blue-500 text-blue-500'
                             : 'text-slate-400 hover:text-white'
                         }`}
                 >
                     <HomeIcon size={18} />
-                    ホーム
+                    <span class="hidden sm:inline">ホーム</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('genres')}
-                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'genres'
+                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'genres'
                             ? 'border-b-2 border-blue-500 text-blue-500'
                             : 'text-slate-400 hover:text-white'
                         }`}
                 >
                     <Tags size={18} />
-                    ジャンル
+                    <span class="hidden sm:inline">ジャンル</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('locations')}
-                    class={`px-4 py-2 flex items-center gap-2 transition-colors ${activeTab() === 'locations'
+                    class={`px-3 sm:px-4 py-2 flex items-center gap-1 sm:gap-2 transition-colors whitespace-nowrap ${activeTab() === 'locations'
                             ? 'border-b-2 border-blue-500 text-blue-500'
                             : 'text-slate-400 hover:text-white'
                         }`}
                 >
                     <MapPin size={18} />
-                    場所
+                    <span class="hidden sm:inline">場所</span>
                 </button>
             </div>
 
-            <div class="mb-8 p-4 bg-slate-800 rounded-lg">
-                <h3 class="text-lg font-medium text-white mb-4">Security</h3>
+            <Show when={activeTab() === 'home'}>
+                <div class="mb-6 sm:mb-8 p-3 sm:p-4 bg-slate-800 rounded-lg">
+                    <h3 class="text-lg font-medium text-white mb-4">Security</h3>
 
-                <div class="mb-4">
-                    <h4 class="text-sm font-medium text-slate-400 mb-2">Registered Passkeys</h4>
-                    <div class="space-y-2">
-                        <For each={passkeys()}>
-                            {(pk) => (
-                                <div class="flex items-center justify-between p-3 bg-slate-900 rounded border border-slate-700">
-                                    <div>
-                                        <div class="font-medium text-white">{pk.name}</div>
-                                        <div class="text-xs text-slate-500">Last used: {new Date(pk.last_used_at).toLocaleDateString()}</div>
-                                    </div>
-                                    <div class="flex items-center gap-4">
-                                        <div class="text-xs text-slate-500">
-                                            Added: {new Date(pk.created_at).toLocaleDateString()}
+                    <div class="mb-4">
+                        <h4 class="text-sm font-medium text-slate-400 mb-2">Registered Passkeys</h4>
+                        <div class="space-y-2">
+                            <For each={passkeys()}>
+                                {(pk) => (
+                                    <div class="flex items-center justify-between p-3 bg-slate-900 rounded border border-slate-700">
+                                        <div>
+                                            <div class="font-medium text-white">{pk.name}</div>
+                                            <div class="text-xs text-slate-500">Last used: {new Date(pk.last_used_at).toLocaleDateString()}</div>
                                         </div>
-                                        <button
-                                            onClick={() => deletePasskey(pk.id)}
-                                            class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition-colors"
-                                            title="Delete passkey"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        <div class="flex items-center gap-4">
+                                            <div class="text-xs text-slate-500">
+                                                Added: {new Date(pk.created_at).toLocaleDateString()}
+                                            </div>
+                                            <button
+                                                onClick={() => deletePasskey(pk.id)}
+                                                class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-800 rounded transition-colors"
+                                                title="Delete passkey"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
-                        </For>
-                        <Show when={passkeys().length === 0}>
-                            <div class="text-slate-500 text-sm italic">No passkeys registered</div>
-                        </Show>
+                                )}
+                            </For>
+                            <Show when={passkeys().length === 0}>
+                                <div class="text-slate-500 text-sm italic">No passkeys registered</div>
+                            </Show>
+                        </div>
                     </div>
-                </div>
 
-                <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
-                    <Button onClick={registerPasskey} variant="outline" class="border-dashed w-full sm:w-auto">
-                        Register New Passkey
-                    </Button>
+                    <div class="mt-4 pt-4 border-t border-slate-700 flex justify-between items-center">
+                        <Button onClick={registerPasskey} variant="outline" class="border-dashed w-full sm:w-auto">
+                            Register New Passkey
+                        </Button>
 
-                    <button
-                        onClick={deleteAccount}
-                        class="text-xs text-red-500 hover:text-red-400 underline"
-                    >
-                        Delete Account
-                    </button>
-                </div>
-
-                <Show when={message()}>
-                    <div class={`mt-2 p-2 rounded text-sm ${message().includes("fail") || message().includes("Error") ? "text-red-400" : "text-emerald-400"}`}>
-                        {message()}
+                        <button
+                            onClick={deleteAccount}
+                            class="text-xs text-red-500 hover:text-red-400 underline"
+                        >
+                            Delete Account
+                        </button>
                     </div>
-                </Show>
-            </div>
+
+                    <Show when={message()}>
+                        <div class={`mt-2 p-2 rounded text-sm ${message().includes("fail") || message().includes("Error") ? "text-red-400" : "text-emerald-400"}`}>
+                            {message()}
+                        </div>
+                    </Show>
+                </div>
+            </Show>
 
             <Show when={activeTab() === 'home'}>
                 <Home />

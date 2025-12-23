@@ -6,6 +6,7 @@ import { Button } from './ui/Button';
 import { Dialog } from './ui/Dialog';
 import { Input } from './ui/Input';
 import { Trash2, Edit2, Plus } from 'lucide-solid';
+import { addToast } from './ui/Toast';
 
 const LocationList: Component = () => {
     const { fetchWithAuth } = useAuth();
@@ -45,29 +46,68 @@ const LocationList: Component = () => {
         e.preventDefault();
         const data = formData();
 
-        if (editingLocation()) {
-            await fetchWithAuth(`/api/locations/${editingLocation()!.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-        } else {
-            await fetchWithAuth('/api/locations/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+        if (!data.name.trim()) {
+            addToast('error', '場所名を入力してください');
+            return;
         }
 
-        setDialogOpen(false);
-        refetchLocations();
+        if (!data.genre_id) {
+            addToast('error', 'ジャンルを選択してください');
+            return;
+        }
+
+        try {
+            if (editingLocation()) {
+                const res = await fetchWithAuth(`/api/locations/${editingLocation()!.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    addToast('error', '場所の更新に失敗しました');
+                    return;
+                }
+
+                addToast('success', '場所を更新しました');
+            } else {
+                const res = await fetchWithAuth('/api/locations/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    addToast('error', '場所の作成に失敗しました');
+                    return;
+                }
+
+                addToast('success', '場所を作成しました');
+            }
+
+            setDialogOpen(false);
+            refetchLocations();
+        } catch (error) {
+            addToast('error', '通信エラーが発生しました');
+        }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm('この場所を削除しますか？')) return;
 
-        await fetchWithAuth(`/api/locations/${id}`, { method: 'DELETE' });
-        refetchLocations();
+        try {
+            const res = await fetchWithAuth(`/api/locations/${id}`, { method: 'DELETE' });
+
+            if (!res.ok) {
+                addToast('error', '場所の削除に失敗しました');
+                return;
+            }
+
+            addToast('success', '場所を削除しました');
+            refetchLocations();
+        } catch (error) {
+            addToast('error', '通信エラーが発生しました');
+        }
     };
 
     const getGenreName = (genre_id: number) => {
@@ -79,35 +119,35 @@ const LocationList: Component = () => {
     };
 
     return (
-        <div class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold">場所管理</h2>
-                <Button onClick={openAddDialog} class="flex items-center gap-2">
-                    <Plus size={20} />
-                    新規場所
+        <div class="space-y-4 sm:space-y-6">
+            <div class="flex justify-between items-center gap-2">
+                <h2 class="text-xl sm:text-2xl font-bold">場所管理</h2>
+                <Button onClick={openAddDialog} class="flex items-center gap-1 sm:gap-2 text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2">
+                    <Plus size={18} class="sm:w-5 sm:h-5" />
+                    <span class="hidden xs:inline">新規</span>
                 </Button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <For each={locations()} fallback={<div class="text-slate-400">場所がありません</div>}>
                     {(location) => (
-                        <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
-                            <div class="flex items-center justify-between mb-2">
-                                <h3 class="font-semibold text-lg">{location.name}</h3>
-                                <div class="flex gap-2">
+                        <div class="p-3 sm:p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
+                            <div class="flex items-center justify-between mb-2 gap-2">
+                                <h3 class="font-semibold text-base sm:text-lg truncate flex-1">{location.name}</h3>
+                                <div class="flex gap-1 sm:gap-2 flex-shrink-0">
                                     <button
                                         onClick={() => openEditDialog(location)}
-                                        class="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors"
+                                        class="p-1.5 sm:p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors"
                                         title="編集"
                                     >
-                                        <Edit2 size={16} />
+                                        <Edit2 size={14} class="sm:w-4 sm:h-4" />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(location.id)}
-                                        class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded transition-colors"
+                                        class="p-1.5 sm:p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded transition-colors"
                                         title="削除"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={14} class="sm:w-4 sm:h-4" />
                                     </button>
                                 </div>
                             </div>

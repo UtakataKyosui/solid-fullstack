@@ -6,6 +6,7 @@ import { Button } from './ui/Button';
 import { Dialog } from './ui/Dialog';
 import { Input } from './ui/Input';
 import { Trash2, Edit2, Plus } from 'lucide-solid';
+import { addToast } from './ui/Toast';
 
 const GenreList: Component = () => {
     const { fetchWithAuth } = useAuth();
@@ -35,67 +36,101 @@ const GenreList: Component = () => {
         e.preventDefault();
         const data = formData();
 
-        if (editingGenre()) {
-            await fetchWithAuth(`/api/genres/${editingGenre()!.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-        } else {
-            await fetchWithAuth('/api/genres/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
+        if (!data.name.trim()) {
+            addToast('error', 'ジャンル名を入力してください');
+            return;
         }
 
-        setDialogOpen(false);
-        refetch();
+        try {
+            if (editingGenre()) {
+                const res = await fetchWithAuth(`/api/genres/${editingGenre()!.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    addToast('error', 'ジャンルの更新に失敗しました');
+                    return;
+                }
+
+                addToast('success', 'ジャンルを更新しました');
+            } else {
+                const res = await fetchWithAuth('/api/genres/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                if (!res.ok) {
+                    addToast('error', 'ジャンルの作成に失敗しました');
+                    return;
+                }
+
+                addToast('success', 'ジャンルを作成しました');
+            }
+
+            setDialogOpen(false);
+            refetch();
+        } catch (error) {
+            addToast('error', '通信エラーが発生しました');
+        }
     };
 
     const handleDelete = async (id: number) => {
         if (!confirm('このジャンルを削除しますか？')) return;
 
-        await fetchWithAuth(`/api/genres/${id}`, { method: 'DELETE' });
-        refetch();
+        try {
+            const res = await fetchWithAuth(`/api/genres/${id}`, { method: 'DELETE' });
+
+            if (!res.ok) {
+                addToast('error', 'ジャンルの削除に失敗しました');
+                return;
+            }
+
+            addToast('success', 'ジャンルを削除しました');
+            refetch();
+        } catch (error) {
+            addToast('error', '通信エラーが発生しました');
+        }
     };
 
     return (
-        <div class="space-y-6">
-            <div class="flex justify-between items-center">
-                <h2 class="text-2xl font-bold">ジャンル管理</h2>
-                <Button onClick={openAddDialog} class="flex items-center gap-2">
-                    <Plus size={20} />
-                    新規ジャンル
+        <div class="space-y-4 sm:space-y-6">
+            <div class="flex justify-between items-center gap-2">
+                <h2 class="text-xl sm:text-2xl font-bold">ジャンル管理</h2>
+                <Button onClick={openAddDialog} class="flex items-center gap-1 sm:gap-2 text-sm sm:text-base px-3 py-1.5 sm:px-4 sm:py-2">
+                    <Plus size={18} class="sm:w-5 sm:h-5" />
+                    <span class="hidden xs:inline">新規</span>
                 </Button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <For each={genres()} fallback={<div class="text-slate-400">ジャンルがありません</div>}>
                     {(genre) => (
-                        <div class="p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
+                        <div class="p-3 sm:p-4 bg-slate-800 rounded-lg border border-slate-700 hover:border-slate-600 transition-colors">
                             <div class="flex items-center justify-between mb-2">
-                                <div class="flex items-center gap-3">
+                                <div class="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
                                     <div
-                                        class="w-6 h-6 rounded"
+                                        class="w-5 h-5 sm:w-6 sm:h-6 rounded flex-shrink-0"
                                         style={{ 'background-color': genre.color }}
                                     />
-                                    <h3 class="font-semibold text-lg">{genre.name}</h3>
+                                    <h3 class="font-semibold text-base sm:text-lg truncate">{genre.name}</h3>
                                 </div>
-                                <div class="flex gap-2">
+                                <div class="flex gap-1 sm:gap-2 flex-shrink-0">
                                     <button
                                         onClick={() => openEditDialog(genre)}
-                                        class="p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors"
+                                        class="p-1.5 sm:p-2 text-slate-400 hover:text-blue-400 hover:bg-slate-700 rounded transition-colors"
                                         title="編集"
                                     >
-                                        <Edit2 size={16} />
+                                        <Edit2 size={14} class="sm:w-4 sm:h-4" />
                                     </button>
                                     <button
                                         onClick={() => handleDelete(genre.id)}
-                                        class="p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded transition-colors"
+                                        class="p-1.5 sm:p-2 text-slate-400 hover:text-red-400 hover:bg-slate-700 rounded transition-colors"
                                         title="削除"
                                     >
-                                        <Trash2 size={16} />
+                                        <Trash2 size={14} class="sm:w-4 sm:h-4" />
                                     </button>
                                 </div>
                             </div>
