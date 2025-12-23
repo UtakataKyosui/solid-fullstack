@@ -6,13 +6,14 @@ export const dialog = defineSlotRecipe({
   slots: dialogAnatomy.extendWith('header', 'body', 'footer').keys(),
   base: {
     backdrop: {
-      background: 'black.a7',
+      background: 'rgba(0, 0, 0, 0.7)',
       height: '100dvh',
       left: '0',
       position: 'fixed',
       top: '0',
       width: '100dvw',
       zIndex: 'var(--z-index)',
+      backdropFilter: 'blur(4px)',
       _open: {
         animationName: 'fade-in',
         animationTimingFunction: 'emphasized-in',
@@ -52,9 +53,11 @@ export const dialog = defineSlotRecipe({
     },
     content: {
       '--dialog-z-index': 'zIndex.modal',
-      bg: 'gray.surface.bg',
+      bg: 'slate.900',
       borderRadius: 'l3',
       boxShadow: 'lg',
+      borderWidth: '1px',
+      borderColor: 'slate.800',
       display: 'flex',
       flexDirection: 'column',
       my: 'var(--dialog-margin, var(--dialog-base-margin))',
