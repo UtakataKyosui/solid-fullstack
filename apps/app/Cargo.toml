@@ -37,6 +37,9 @@ include_dir = { version = "0.7" }
 webauthn-rs = { version = "0.5", features = ["danger-allow-state-serialisation"] }
 base64 = "0.22"
 axum-extra = { version = "0.10", features = ["form"] }
+# Force older versions that don't require edition2024
+base64ct = "=1.6.0"
+backon = "=1.2.0"
 
 [[bin]]
 name = "app-cli"
