@@ -1,10 +1,11 @@
 import type { Component } from 'solid-js';
-import { createSignal, createEffect, Show } from 'solid-js';
+import { createSignal, Show } from 'solid-js';
+// import { createEffect } from 'solid-js'; // Commented out with auth features
 // import { For } from 'solid-js'; // Commented out with passkey features
 // import { startRegistration } from "@simplewebauthn/browser";
-import { useAuth } from '../lib/auth';
+// import { useAuth } from '../lib/auth'; // Commented out with auth features
 // import type { Passkey } from '../lib/types';
-import { Button } from '@/components/ui/button';
+// import { Button } from '@/components/ui/button'; // Commented out with auth features
 import Home from './home/Home';
 import GenreList from './GenreList';
 import LocationList from './LocationList';
@@ -15,7 +16,8 @@ import { Box, Flex } from 'styled-system/jsx';
 // import { Stack } from 'styled-system/jsx'; // Commented out with passkey features
 
 const MainPage: Component = () => {
-    const { user, logout } = useAuth();
+    // TODO: Re-enable authentication in separate branch
+    // const { user, logout } = useAuth();
     // const { fetchWithAuth } = useAuth(); //Commented out with passkey features
     // const [message, setMessage] = createSignal("");
     // const [passkeys, setPasskeys] = createSignal<Passkey[]>([]);
@@ -44,9 +46,11 @@ const MainPage: Component = () => {
     });
     */
 
+    /*
     createEffect(() => {
         console.log("Current user state:", user());
     });
+    */
 
     /*
     const registerPasskey = async () => {
@@ -138,6 +142,7 @@ const MainPage: Component = () => {
                 <h1 class={css({ fontSize: { base: 'xl', sm: '2xl' }, fontWeight: 'bold' })}>
                     Home Organization
                 </h1>
+                {/* TODO: Re-enable user display and logout in authentication branch
                 <Flex align="center" gap={{ base: '2', sm: '4' }} w={{ base: 'full', sm: 'auto' }}>
                     <span class={css({ fontSize: { base: 'sm', sm: 'base' }, truncate: true })}>
                         Welcome, {user()?.name}
@@ -151,6 +156,7 @@ const MainPage: Component = () => {
                         Logout
                     </Button>
                 </Flex>
+                */}
             </Flex>
 
             <Flex
