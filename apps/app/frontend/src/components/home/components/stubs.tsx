@@ -13,7 +13,7 @@ export const UnassignedItems: Component<UnassignedItemsProps> = (props) => (
     <Box
         p={{ base: '3', sm: '4' }}
         bg="slate.800"
-        rounded="lg"
+        rounded="xl"
         borderWidth="1px"
         borderColor="slate.700"
     >
@@ -34,7 +34,7 @@ export const LocationCard: Component<LocationCardProps> = (props) => (
     <Box
         p={{ base: '3', sm: '4' }}
         bg="slate.800"
-        rounded="lg"
+        rounded="xl"
         borderWidth="1px"
         borderColor="slate.700"
         _hover={{ borderColor: 'slate.600' }}

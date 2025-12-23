@@ -47,7 +47,7 @@ const Home: Component = () => {
                 as="header"
                 p={{ base: '3', sm: '4' }}
                 bg="slate.900"
-                rounded="lg"
+                rounded="xl"
                 borderWidth="1px"
                 borderColor="slate.800"
             >

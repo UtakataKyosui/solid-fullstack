@@ -182,7 +182,7 @@ const MainPage: Component = () => {
 
             {/* TODO: Re-enable Security section in separate authentication branch
             <Show when={activeTab() === 'home'}>
-                <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="lg">
+                <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="xl">
                     <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', color: 'white', mb: '4' })}>
                         Security
                     </h3>
