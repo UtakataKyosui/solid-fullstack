@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install cargo-watch for hot reload
-RUN cargo install cargo-watch
+# Install bacon for hot reload (faster than cargo-watch)
+RUN cargo install bacon
 
 # Set working directory
 WORKDIR /app
@@ -20,6 +20,6 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Build and watch for changes using loco
-# This will compile on first start and then watch for changes
-CMD ["cargo", "loco", "watch"]
+# Use bacon to watch and rebuild on changes
+# bacon run will execute 'cargo run' on file changes
+CMD ["bacon", "run", "--", "start"]
