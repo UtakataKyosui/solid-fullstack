@@ -78,11 +78,11 @@ use serde::{Deserialize, Serialize};
     
     pub fn routes() -> Routes {
         Routes::new()
-            .prefix("api/genres/")
+            .prefix("api/genres")
             .add("/", get(list))
             .add("/", post(add))
-            .add("{id}", get(get_one))
-            .add("{id}", delete(remove))
-            .add("{id}", put(update))
-            .add("{id}", patch(update))
+            .add("/:id", get(get_one))
+            .add("/:id", delete(remove))
+            .add("/:id", put(update))
+            .add("/:id", patch(update))
     }

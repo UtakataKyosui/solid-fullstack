@@ -79,12 +79,12 @@ use serde::{Deserialize, Serialize};
     }
     
     pub fn routes() -> Routes {
-        Routes::new()
-            .prefix("api/locations/")
-            .add("/", get(list))
-            .add("/", post(add))
-            .add("{id}", get(get_one))
-            .add("{id}", delete(remove))
-            .add("{id}", put(update))
-            .add("{id}", patch(update))
-    }
+    Routes::new()
+        .prefix("api/locations")
+        .add("/", get(list))
+        .add("/", post(add))
+        .add("/:id", get(get_one))
+        .add("/:id", delete(remove))
+        .add("/:id", put(update))
+        .add("/:id", patch(update))
+}
