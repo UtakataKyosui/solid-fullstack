@@ -97,7 +97,7 @@ export default function Auth() {
                     login({ user: data, token: data.token });
                     setMessage("Passkey Login successful!");
                 } else {
-                    setMessage("Passkey verified (Token not yet implemented in backend)");
+                    setMessage("Login failed: No token received");
                 }
             } else {
                 setMessage("Passkey login failed: " + (await finishRes.text()));
