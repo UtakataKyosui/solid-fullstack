@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install watchexec for hot reload (Docker-compatible)
-RUN cargo install watchexec-cli
+# Install cargo-watch for hot reload
+RUN cargo install cargo-watch
 
 # Set working directory
 WORKDIR /app
@@ -20,5 +20,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Use watchexec to watch for file changes and restart server
-CMD ["watchexec", "-r", "-e", "rs,toml", "--", "cargo", "run", "--", "start"]
+# Use cargo-watch to reload on file changes
+CMD ["cargo", "watch", "-x", "run -- start"]
