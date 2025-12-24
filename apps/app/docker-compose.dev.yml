@@ -38,7 +38,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: bacon run -- start
+    command: watchexec -r -e rs,toml -- cargo run -- start
 
   # Frontend (Rsbuild dev server)
   frontend:

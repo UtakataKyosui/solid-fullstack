@@ -8,8 +8,8 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Install bacon for hot reload (faster than cargo-watch)
-RUN cargo install bacon
+# Install watchexec for hot reload (Docker-compatible)
+RUN cargo install watchexec-cli
 
 # Set working directory
 WORKDIR /app
@@ -20,6 +20,5 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Start the loco server
-# For development with hot reload, mount source as volume and rebuild manually
-CMD ["cargo", "loco", "start"]
+# Use watchexec to watch for file changes and restart server
+CMD ["watchexec", "-r", "-e", "rs,toml", "--", "cargo", "run", "--", "start"]
