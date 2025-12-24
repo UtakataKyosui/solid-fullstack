@@ -38,7 +38,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: cargo loco start
+    command: bacon run -- start
 
   # Frontend (Rsbuild dev server)
   frontend:
@@ -53,6 +53,7 @@ services:
     command: sh -c "bun install && bun dev"
     environment:
       - NODE_ENV=development
+      - DOCKER_ENV=true
 
 volumes:
   postgres_data:
