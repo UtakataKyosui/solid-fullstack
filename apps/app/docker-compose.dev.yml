@@ -38,7 +38,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: bacon run -- start
+    command: cargo loco start
 
   # Frontend (Rsbuild dev server)
   frontend:

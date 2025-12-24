@@ -20,6 +20,6 @@ COPY . .
 # Expose port
 EXPOSE 8000
 
-# Use bacon to watch and rebuild on changes
-# bacon run will execute 'cargo run' on file changes
-CMD ["bacon", "run", "--", "start"]
+# Start the loco server
+# For development with hot reload, mount source as volume and rebuild manually
+CMD ["cargo", "loco", "start"]
