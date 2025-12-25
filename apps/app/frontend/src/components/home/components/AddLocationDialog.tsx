@@ -1,58 +1,63 @@
-import type { Component } from 'solid-js';
-import { createSignal, For } from 'solid-js';
+import { createSignal, type Component } from 'solid-js';
+import { createForm, valiForm, reset } from '@modular-forms/solid';
+import * as v from 'valibot';
+import { Portal } from 'solid-js/web';
 import { useAuth } from '../../../lib/auth';
-import type { Genre } from '../../../lib/types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { css } from 'styled-system/css';
-import { Stack, Box } from 'styled-system/jsx';
+import { Text } from '@/components/ui/text';
+import * as Field from '@/components/ui/field';
+import * as Fieldset from '@/components/ui/fieldset';
+import { Stack } from 'styled-system/jsx';
+
+// Valibot Schema
+const AddLocationSchema = v.object({
+    name: v.pipe(
+        v.string(),
+        v.minLength(1, 'Name is required'),
+        v.maxLength(255, 'Name must be less than 255 characters')
+    ),
+    description: v.optional(v.string()),
+});
+
+type AddLocationForm = v.InferInput<typeof AddLocationSchema>;
 
 interface AddLocationDialogProps {
-    genres: Genre[];
     onSuccess: () => void;
 }
 
-export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
-    const { fetchWithAuth } = useAuth();
+export const AddLocationDialog: Component<AddLocationDialogProps> = (componentProps) => {
     const [isOpen, setIsOpen] = createSignal(false);
-    const [loading, setLoading] = createSignal(false);
+    const { fetchWithAuth } = useAuth();
 
-    const [name, setName] = createSignal('');
-    const [description, setDescription] = createSignal('');
-    const [genreId, setGenreId] = createSignal('');
+    const [form, { Form, Field: FormField }] = createForm<AddLocationForm>({
+        validate: valiForm(AddLocationSchema),
+        initialValues: {
+            name: '',
+            description: '',
+        },
+    });
 
-    const resetForm = () => {
-        setName('');
-        setDescription('');
-        setGenreId('');
-    };
-
-    const handleSubmit = async (e: Event) => {
-        e.preventDefault();
-        if (!name() || !genreId()) return;
-
-        setLoading(true);
+    const handleSubmit = async (values: AddLocationForm) => {
         try {
-            const body = {
-                name: name(),
-                description: description() || null,
-                genre_id: parseInt(genreId())
-            };
-
-            const res = await fetchWithAuth('/api/locations', {
+            const response = await fetchWithAuth('/api/locations', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify({
+                    name: values.name,
+                    description: values.description || null,
+                }),
             });
 
-            if (res.ok) {
-                resetForm();
+            if (response.ok) {
                 setIsOpen(false);
-                props.onSuccess();
+                componentProps.onSuccess();
+                // Reset form
+                reset(form);
             }
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.error('Failed to create location:', error);
         }
     };
 
@@ -63,69 +68,64 @@ export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
                 open={isOpen()}
                 onOpenChange={(e) => setIsOpen(e.open)}
                 closeOnInteractOutside={true}
+                closeOnEscape={true}
             >
-                <Dialog.Backdrop />
-                <Dialog.Positioner>
-                    <Dialog.Content>
-                        <Dialog.Title>Add New Location</Dialog.Title>
-                        <Dialog.Description>
-                            Create a new location for organizing your items
-                        </Dialog.Description>
+                <Portal>
+                    <Dialog.Backdrop />
+                    <Dialog.Positioner>
+                        <Dialog.Content>
+                            <Dialog.CloseTrigger />
+                            <Dialog.Header>
+                                <Stack gap="2">
+                                    <Text textStyle="xl" fontWeight="bold">
+                                        Add New Location
+                                    </Text>
+                                    <Text textStyle="sm" color="fg.muted">
+                                        Create a new location for organizing your items
+                                    </Text>
+                                </Stack>
+                            </Dialog.Header>
 
-                        <form onSubmit={handleSubmit}>
-                            <Stack gap="4">
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Location Name
-                                    </label>
-                                    <Input
-                                        value={name()}
-                                        onInput={(e) => setName(e.currentTarget.value)}
-                                        required
-                                        placeholder="e.g., Bookshelf A"
-                                    />
-                                </Box>
+                            <Form onSubmit={(values) => handleSubmit(values)}>
+                                <Dialog.Body>
+                                    <Fieldset.Root>
+                                        <Fieldset.Content>
+                                            <Stack gap="4">
+                                                <FormField name="name">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root required invalid={!!field.error}>
+                                                            <Field.Label>
+                                                                Name
+                                                                <Field.RequiredIndicator />
+                                                            </Field.Label>
+                                                            <Input
+                                                                {...fieldProps}
+                                                                value={field.value || ''}
+                                                                placeholder="Location name"
+                                                            />
+                                                            <Field.ErrorText>{field.error}</Field.ErrorText>
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
 
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Description
-                                    </label>
-                                    <Input
-                                        value={description()}
-                                        onInput={(e) => setDescription(e.currentTarget.value)}
-                                        placeholder="e.g., Living room shelf"
-                                    />
-                                </Box>
+                                                <FormField name="description">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root>
+                                                            <Field.Label>Description</Field.Label>
+                                                            <Input
+                                                                {...fieldProps}
+                                                                value={field.value || ''}
+                                                                placeholder="Optional description"
+                                                            />
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
+                                            </Stack>
+                                        </Fieldset.Content>
+                                    </Fieldset.Root>
+                                </Dialog.Body>
 
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Genre
-                                    </label>
-                                    <select
-                                        class={css({
-                                            w: 'full',
-                                            h: '10',
-                                            px: '3',
-                                            rounded: 'md',
-                                            bg: 'slate.950',
-                                            borderWidth: '1px',
-                                            borderColor: 'slate.800',
-                                            fontSize: 'sm',
-                                            color: 'white',
-                                            _focus: { outlineColor: 'blue.500' }
-                                        })}
-                                        value={genreId()}
-                                        onChange={(e) => setGenreId(e.currentTarget.value)}
-                                        required
-                                    >
-                                        <option value="" disabled>Select a genre</option>
-                                        <For each={props.genres}>
-                                            {(genre) => <option value={genre.id}>{genre.name}</option>}
-                                        </For>
-                                    </select>
-                                </Box>
-
-                                <Box class={css({ display: 'flex', justifyContent: 'flex-end', gap: '2', pt: '4' })}>
+                                <Dialog.Footer style={{ "margin-top": '1.5rem' }}>
                                     <Button
                                         type="button"
                                         variant="outline"
@@ -133,16 +133,14 @@ export const AddLocationDialog: Component<AddLocationDialogProps> = (props) => {
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" loading={loading()}>
-                                        {loading() ? "Creating..." : "Create Location"}
+                                    <Button type="submit" loading={form.submitting}>
+                                        {form.submitting ? "Creating..." : "Create Location"}
                                     </Button>
-                                </Box>
-                            </Stack>
-                        </form>
-
-                        <Dialog.CloseTrigger />
-                    </Dialog.Content>
-                </Dialog.Positioner>
+                                </Dialog.Footer>
+                            </Form>
+                        </Dialog.Content>
+                    </Dialog.Positioner>
+                </Portal>
             </Dialog.Root>
         </>
     );

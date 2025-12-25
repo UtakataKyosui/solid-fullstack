@@ -23,6 +23,7 @@ export const dialog = defineSlotRecipe({
         animationName: 'fade-out',
         animationTimingFunction: 'emphasized-out',
         animationDuration: 'fast',
+        display: 'none',
       },
     },
     positioner: {
@@ -43,7 +44,7 @@ export const dialog = defineSlotRecipe({
       textStyle: 'lg',
     },
     description: {
-      color: 'fg.muted',
+      color: 'fg.default',
       textStyle: 'sm',
     },
     closeTrigger: {
@@ -53,11 +54,11 @@ export const dialog = defineSlotRecipe({
     },
     content: {
       '--dialog-z-index': '1001',
-      bg: 'slate.900',
+      bg: 'bg.default',
       borderRadius: 'l3',
       boxShadow: 'lg',
       borderWidth: '1px',
-      borderColor: 'slate.800',
+      borderColor: 'border.default',
       display: 'flex',
       flexDirection: 'column',
       my: 'var(--dialog-margin, var(--dialog-base-margin))',
@@ -73,6 +74,7 @@ export const dialog = defineSlotRecipe({
       },
       _closed: {
         animationDuration: 'normal',
+        display: 'none',
       },
     },
     header: {

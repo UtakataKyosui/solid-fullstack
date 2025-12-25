@@ -12,9 +12,11 @@ export const select = defineSlotRecipe({
       width: 'full',
     },
     content: {
-      background: 'gray.surface.bg',
+      background: 'bg.default',
       borderRadius: 'l2',
       boxShadow: 'md',
+      borderWidth: '1px',
+      borderColor: 'border.default',
       display: 'flex',
       flexDirection: 'column',
       maxH: 'min(var(--available-height), {sizes.96})',
@@ -39,10 +41,10 @@ export const select = defineSlotRecipe({
       justifyContent: 'space-between',
       userSelect: 'none',
       _hover: {
-        background: 'gray.surface.bg.hover',
+        background: 'bg.subtle',
       },
       _highlighted: {
-        background: 'gray.surface.bg.hover',
+        background: 'bg.subtle',
       },
       _selected: {},
       _disabled: {
@@ -73,7 +75,7 @@ export const select = defineSlotRecipe({
         content: '""',
         width: '100%',
         height: '1px',
-        bg: 'gray.4',
+        bg: 'border.muted',
       },
     },
     itemIndicator: {
@@ -96,11 +98,15 @@ export const select = defineSlotRecipe({
       transition: 'common',
       userSelect: 'none',
       width: 'full',
+      color: 'fg.default',
       _placeholderShown: {
         color: 'fg.subtle',
       },
       _disabled: {
         layerStyle: 'disabled',
+      },
+      _invalid: {
+        borderColor: 'error!',
       },
     },
     valueText: {
@@ -118,17 +124,18 @@ export const select = defineSlotRecipe({
       outline: {
         trigger: {
           borderWidth: '1px',
-          borderColor: 'gray.outline.border',
-
+          borderColor: 'border.default',
+          bg: 'bg.default',
+          color: 'fg.default',
           focusVisibleRing: 'inside',
         },
       },
       surface: {
         trigger: {
-          bg: 'gray.surface.bg',
+          bg: 'bg.default',
           borderWidth: '1px',
-          borderColor: 'gray.surface.border',
-
+          borderColor: 'border.default',
+          color: 'fg.default',
           focusVisibleRing: 'inside',
         },
       },

@@ -1,4 +1,5 @@
 import type { Component } from 'solid-js';
+import { Show, For } from 'solid-js';
 import type { Item, Location } from '../../../lib/types';
 import { Button } from '@/components/ui/button';
 import { Box, Stack, Flex } from 'styled-system/jsx';
@@ -12,15 +13,48 @@ interface UnassignedItemsProps {
 export const UnassignedItems: Component<UnassignedItemsProps> = (props) => (
     <Box
         p={{ base: '3', sm: '4' }}
-        bg="slate.800"
+        bg="bg.subtle"
         rounded="xl"
         borderWidth="1px"
-        borderColor="slate.700"
+        borderColor="border.default"
     >
-        <h3 class={css({ fontWeight: 'bold', mb: '2' })}>Unassigned Items</h3>
-        <Box color="slate.400" fontSize="sm">
-            {props.items?.length === 0 ? 'No unassigned items' : `${props.items.length} items`}
+        <h3 class={css({ fontWeight: 'bold', mb: '2' })}>Unassigned</h3>
+        <Box color="fg.muted" fontSize="sm" mb="3">
+            Items not assigned to any location
         </Box>
+        <Show when={props.items?.length === 0}>
+            <Box color="fg.muted" fontSize="sm" fontStyle="italic">
+                No items
+            </Box>
+        </Show>
+        <Show when={props.items?.length > 0}>
+            <Stack gap="2">
+                <For each={props.items}>
+                    {(item) => (
+                        <Box
+                            p="2"
+                            bg="bg.default"
+                            rounded="md"
+                            borderWidth="1px"
+                            borderColor="border.default"
+                        >
+                            <Flex justify="space-between" align="center">
+                                <Box>
+                                    <div class={css({ fontWeight: 'medium', fontSize: 'sm' })}>
+                                        {item.name}
+                                    </div>
+                                    <Show when={item.description}>
+                                        <div class={css({ fontSize: 'xs', color: 'fg.muted' })}>
+                                            {item.description}
+                                        </div>
+                                    </Show>
+                                </Box>
+                            </Flex>
+                        </Box>
+                    )}
+                </For>
+            </Stack>
+        </Show>
     </Box>
 );
 
@@ -33,25 +67,59 @@ interface LocationCardProps {
 export const LocationCard: Component<LocationCardProps> = (props) => (
     <Box
         p={{ base: '3', sm: '4' }}
-        bg="slate.800"
+        bg="bg.subtle"
         rounded="xl"
         borderWidth="1px"
-        borderColor="slate.700"
-        _hover={{ borderColor: 'slate.600' }}
+        borderColor="border.default"
+        _hover={{ borderColor: 'border.muted' }}
         transition="colors"
     >
-        <Stack gap="2">
-            <h3 class={css({ fontWeight: 'bold', fontSize: { base: 'base', sm: 'lg' } })}>
-                {props.location.name}
-            </h3>
-            {props.location.description && (
-                <p class={css({ fontSize: 'sm', color: 'slate.400' })}>
-                    {props.location.description}
-                </p>
-            )}
-            <Box fontSize="sm" color="slate.500">
-                {props.items.length} {props.items.length === 1 ? 'item' : 'items'}
+        <Stack gap="3">
+            <Box>
+                <h3 class={css({ fontWeight: 'bold', fontSize: { base: 'base', sm: 'lg' } })}>
+                    {props.location.name}
+                </h3>
+                {props.location.description && (
+                    <p class={css({ fontSize: 'sm', color: 'fg.muted', mt: '1' })}>
+                        {props.location.description}
+                    </p>
+                )}
             </Box>
+
+            <Show when={props.items.length === 0}>
+                <Box color="fg.muted" fontSize="sm" fontStyle="italic">
+                    No items in this location
+                </Box>
+            </Show>
+
+            <Show when={props.items.length > 0}>
+                <Stack gap="2">
+                    <For each={props.items}>
+                        {(item) => (
+                            <Box
+                                p="2"
+                                bg="bg.default"
+                                rounded="md"
+                                borderWidth="1px"
+                                borderColor="border.default"
+                            >
+                                <Flex justify="space-between" align="center">
+                                    <Box>
+                                        <div class={css({ fontWeight: 'medium', fontSize: 'sm' })}>
+                                            {item.name}
+                                        </div>
+                                        <Show when={item.description}>
+                                            <div class={css({ fontSize: 'xs', color: 'fg.muted' })}>
+                                                {item.description}
+                                            </div>
+                                        </Show>
+                                    </Box>
+                                </Flex>
+                            </Box>
+                        )}
+                    </For>
+                </Stack>
+            </Show>
         </Stack>
     </Box>
 );

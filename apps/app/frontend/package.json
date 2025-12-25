@@ -10,10 +10,12 @@
   },
   "dependencies": {
     "@ark-ui/solid": "^5.30.0",
+    "@modular-forms/solid": "^0.25.1",
     "@simplewebauthn/browser": "^13.2.2",
     "@thisbeyond/solid-dnd": "^0.7.5",
     "lucide-solid": "^0.562.0",
-    "solid-js": "^1.9.10"
+    "solid-js": "^1.9.10",
+    "valibot": "^1.2.0"
   },
   "devDependencies": {
     "@pandacss/dev": "^1.7.1",

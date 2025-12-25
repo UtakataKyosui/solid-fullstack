@@ -127,8 +127,8 @@ const MainPage: Component = () => {
         whiteSpace: 'nowrap',
         borderBottom: isActive ? '2px solid' : 'none',
         borderColor: isActive ? 'blue.500' : 'transparent',
-        color: isActive ? 'blue.500' : 'slate.400',
-        _hover: { color: isActive ? 'blue.500' : 'white' }
+        color: isActive ? 'blue.500' : 'fg.muted',
+        _hover: { color: isActive ? 'blue.500' : 'fg.default' }
     });
 
     return (
@@ -163,7 +163,7 @@ const MainPage: Component = () => {
                 gap={{ base: '1', sm: '2' }}
                 mb={{ base: '4', sm: '6' }}
                 borderBottomWidth="1px"
-                borderColor="slate.700"
+                borderColor="border.default"
                 overflowX="auto"
             >
                 <button onClick={() => setActiveTab('home')} class={tabButtonClass(activeTab() === 'home')}>
@@ -182,14 +182,14 @@ const MainPage: Component = () => {
 
             {/* TODO: Re-enable Security section in separate authentication branch
             <Show when={activeTab() === 'home'}>
-                <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="slate.800" rounded="xl">
-                    <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', color: 'white', mb: '4' })}>
+                <Box mb={{ base: '6', sm: '8' }} p={{ base: '3', sm: '4' }} bg="bg.subtle" rounded="xl">
+                    <h3 class={css({ fontSize: 'lg', fontWeight: 'medium', mb: '4' })}>
                         Security
                     </h3>
 
                     <Stack gap="4" mb="4">
                         <Box>
-                            <h4 class={css({ fontSize: 'sm', fontWeight: 'medium', color: 'slate.400', mb: '2' })}>
+                            <h4 class={css({ fontSize: 'sm', fontWeight: 'medium', color: 'fg.muted', mb: '2' })}>
                                 Registered Passkeys
                             </h4>
                             <Stack gap="2">
@@ -199,29 +199,29 @@ const MainPage: Component = () => {
                                             align="center"
                                             justify="space-between"
                                             p="3"
-                                            bg="slate.900"
+                                            bg="bg.default"
                                             rounded="md"
                                             borderWidth="1px"
-                                            borderColor="slate.700"
+                                            borderColor="border.default"
                                         >
                                             <Box>
-                                                <div class={css({ fontWeight: 'medium', color: 'white' })}>
+                                                <div class={css({ fontWeight: 'medium' })}>
                                                     {pk.name}
                                                 </div>
-                                                <div class={css({ fontSize: 'xs', color: 'slate.500' })}>
+                                                <div class={css({ fontSize: 'xs', color: 'fg.muted' })}>
                                                     Last used: {new Date(pk.last_used_at).toLocaleDateString()}
                                                 </div>
                                             </Box>
                                             <Flex align="center" gap="4">
-                                                <div class={css({ fontSize: 'xs', color: 'slate.500' })}>
+                                                <div class={css({ fontSize: 'xs', color: 'fg.muted' })}>
                                                     Added: {new Date(pk.created_at).toLocaleDateString()}
                                                 </div>
                                                 <button
                                                     onClick={() => deletePasskey(pk.id)}
                                                     class={css({
                                                         p: '2',
-                                                        color: 'slate.400',
-                                                        _hover: { color: 'red.400', bg: 'slate.800' },
+                                                        color: 'fg.muted',
+                                                        _hover: { color: 'red.400', bg: 'bg.subtle' },
                                                         rounded: 'md',
                                                         transition: 'colors'
                                                     })}
@@ -234,7 +234,7 @@ const MainPage: Component = () => {
                                     )}
                                 </For>
                                 <Show when={passkeys().length === 0}>
-                                    <div class={css({ color: 'slate.500', fontSize: 'sm', fontStyle: 'italic' })}>
+                                    <div class={css({ color: 'fg.muted', fontSize: 'sm', fontStyle: 'italic' })}>
                                         No passkeys registered
                                     </div>
                                 </Show>
@@ -246,7 +246,7 @@ const MainPage: Component = () => {
                         mt="4"
                         pt="4"
                         borderTopWidth="1px"
-                        borderColor="slate.700"
+                        borderColor="border.default"
                         justify="space-between"
                         align="center"
                     >

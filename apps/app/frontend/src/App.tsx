@@ -3,14 +3,20 @@
 import MainPage from './components/MainPage';
 // import { useAuth } from './lib/auth'; // Commented out with auth features
 import { Toaster } from '@/components/ui/toast';
-import { css } from 'styled-system/css';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { Box, Flex } from 'styled-system/jsx';
 
 const App = () => {
   // const { user } = useAuth(); // TODO: Re-enable in authentication branch
 
   return (
-    <div class={css({ minH: '100vh', bg: 'slate.950', color: 'white' })}>
+    <Box minH="100vh" bg="bg.canvas" color="fg.default">
       <Toaster />
+
+      {/* Theme Toggle Button */}
+      <Flex justify="flex-end" p="4">
+        <ThemeToggle />
+      </Flex>
 
       {/* TODO: Re-enable authentication in separate branch */}
       {/* 
@@ -45,7 +51,7 @@ const App = () => {
 
       {/* Temporary: Direct access to MainPage without authentication */}
       <MainPage />
-    </div>
+    </Box>
   );
 };
 

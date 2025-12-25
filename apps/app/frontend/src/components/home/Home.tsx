@@ -46,10 +46,10 @@ const Home: Component = () => {
             <Box
                 as="header"
                 p={{ base: '3', sm: '4' }}
-                bg="slate.900"
+                bg="bg.subtle"
                 rounded="xl"
                 borderWidth="1px"
-                borderColor="slate.800"
+                borderColor="border.default"
             >
                 <Stack gap="4">
                     <Flex justify="space-between" align="center">
@@ -57,7 +57,7 @@ const Home: Component = () => {
                             <h2 class={css({ fontSize: { base: 'lg', sm: 'xl' }, fontWeight: 'bold' })}>
                                 Inventory Management
                             </h2>
-                            <p class={css({ color: 'slate.400', fontSize: 'sm' })}>
+                            <p class={css({ color: 'fg.muted', fontSize: 'sm' })}>
                                 {(items() || []).length} items, {(locations() || []).length} locations
                             </p>
                         </Box>
@@ -96,7 +96,7 @@ const Home: Component = () => {
             <Show when={locationFilter() !== "unassigned"}>
                 <Grid columns={{ base: 1, md: 2, lg: 3 }} gap={{ base: '3', sm: '4' }}>
                     <For each={locations()} fallback={
-                        <Box color="slate.500" fontSize="sm">
+                        <Box color="fg.muted" fontSize="sm">
                             No locations found. Create one to get started.
                         </Box>
                     }>

@@ -1,12 +1,34 @@
-import type { Component } from 'solid-js';
-import { createSignal, For } from 'solid-js';
+import { createSignal, For, type Component } from 'solid-js';
+import { createForm, valiForm, reset } from '@modular-forms/solid';
+import * as v from 'valibot';
+import { Portal } from 'solid-js/web';
 import { useAuth } from '../../../lib/auth';
 import type { Genre, Location } from '../../../lib/types';
 import { Dialog } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Text } from '@/components/ui/text';
+import * as Field from '@/components/ui/field';
+import * as Fieldset from '@/components/ui/fieldset';
+import { Stack } from 'styled-system/jsx';
 import { css } from 'styled-system/css';
-import { Stack, Box } from 'styled-system/jsx';
+
+// Valibot Schema
+const AddItemSchema = v.object({
+    name: v.pipe(
+        v.string(),
+        v.minLength(1, 'Name is required'),
+        v.maxLength(255, 'Name must be less than 255 characters')
+    ),
+    description: v.optional(v.string()),
+    genreId: v.pipe(
+        v.string(),
+        v.minLength(1, 'Genre is required')
+    ),
+    locationId: v.string(), // 'unassigned' is valid
+});
+
+type AddItemForm = v.InferInput<typeof AddItemSchema>;
 
 interface AddItemDialogProps {
     genres: Genre[];
@@ -14,50 +36,50 @@ interface AddItemDialogProps {
     onSuccess: () => void;
 }
 
-export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
-    const { fetchWithAuth } = useAuth();
+export const AddItemDialog: Component<AddItemDialogProps> = (componentProps) => {
     const [isOpen, setIsOpen] = createSignal(false);
-    const [loading, setLoading] = createSignal(false);
+    const { fetchWithAuth } = useAuth();
 
-    const [name, setName] = createSignal('');
-    const [description, setDescription] = createSignal('');
-    const [genreId, setGenreId] = createSignal('');
-    const [locationId, setLocationId] = createSignal('unassigned');
+    const [form, { Form, Field: FormField }] = createForm<AddItemForm>({
+        validate: valiForm(AddItemSchema),
+        initialValues: {
+            name: '',
+            description: '',
+            genreId: '',
+            locationId: '0',  // id=0のUnassignedロケーション
+        },
+    });
 
-    const resetForm = () => {
-        setName('');
-        setDescription('');
-        setGenreId('');
-        setLocationId('unassigned');
-    };
-
-    const handleSubmit = async (e: Event) => {
-        e.preventDefault();
-        if (!name() || !genreId()) return;
-
-        setLoading(true);
+    const handleSubmit = async (values: AddItemForm) => {
+        console.log('handleSubmit called', values);
         try {
-            const body = {
-                name: name(),
-                description: description() || null,
-                genre_id: parseInt(genreId()),
-                location_id: locationId() === 'unassigned' ? null : parseInt(locationId())
-            };
-
-            const res = await fetchWithAuth('/api/items', {
+            const response = await fetchWithAuth('/api/items', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
+                body: JSON.stringify({
+                    name: values.name,
+                    description: values.description || null,
+                    genre_id: parseInt(values.genreId as string),
+                    location_id: parseInt(values.locationId as string),
+                }),
             });
 
-            if (res.ok) {
-                resetForm();
+            console.log('Response:', response.ok);
+            if (response.ok) {
+                console.log('Closing dialog...');
                 setIsOpen(false);
-                props.onSuccess();
+                componentProps.onSuccess();
+                // Reset form
+                reset(form);
             }
-        } finally {
-            setLoading(false);
+        } catch (error) {
+            console.error('Failed to create item:', error);
         }
+    };
+
+    const handleCancel = () => {
+        console.log('Cancel clicked, closing dialog...');
+        setIsOpen(false);
     };
 
     return (
@@ -67,113 +89,140 @@ export const AddItemDialog: Component<AddItemDialogProps> = (props) => {
                 open={isOpen()}
                 onOpenChange={(e) => setIsOpen(e.open)}
                 closeOnInteractOutside={true}
+                closeOnEscape={true}
             >
-                <Dialog.Backdrop />
-                <Dialog.Positioner>
-                    <Dialog.Content>
-                        <Dialog.Title>Add New Item</Dialog.Title>
-                        <Dialog.Description>
-                            Create a new item to track in your inventory
-                        </Dialog.Description>
+                <Portal>
+                    <Dialog.Backdrop />
+                    <Dialog.Positioner>
+                        <Dialog.Content>
+                            <Dialog.CloseTrigger />
+                            <Dialog.Header>
+                                <Stack gap="2">
+                                    <Text textStyle="xl" fontWeight="bold">
+                                        Add New Item
+                                    </Text>
+                                    <Text textStyle="sm" color="fg.muted">
+                                        Create a new item to track in your inventory
+                                    </Text>
+                                </Stack>
+                            </Dialog.Header>
 
-                        <form onSubmit={handleSubmit}>
-                            <Stack gap="4">
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Name
-                                    </label>
-                                    <Input
-                                        value={name()}
-                                        onInput={(e) => setName(e.currentTarget.value)}
-                                        required
-                                        placeholder="Item name"
-                                    />
-                                </Box>
+                            <Form onSubmit={(values) => handleSubmit(values)}>
+                                <Dialog.Body>
+                                    <Fieldset.Root>
+                                        <Fieldset.Content>
+                                            <Stack gap="4">
+                                                <FormField name="name">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root required invalid={!!field.error}>
+                                                            <Field.Label>
+                                                                Name
+                                                                <Field.RequiredIndicator />
+                                                            </Field.Label>
+                                                            <Input
+                                                                {...fieldProps}
+                                                                value={field.value || ''}
+                                                                placeholder="Item name"
+                                                            />
+                                                            <Field.ErrorText>{field.error}</Field.ErrorText>
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
 
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Description
-                                    </label>
-                                    <Input
-                                        value={description()}
-                                        onInput={(e) => setDescription(e.currentTarget.value)}
-                                        placeholder="Optional description"
-                                    />
-                                </Box>
+                                                <FormField name="description">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root>
+                                                            <Field.Label>Description</Field.Label>
+                                                            <Input
+                                                                {...fieldProps}
+                                                                value={field.value || ''}
+                                                                placeholder="Optional description"
+                                                            />
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
 
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Genre
-                                    </label>
-                                    <select
-                                        class={css({
-                                            w: 'full',
-                                            h: '10',
-                                            px: '3',
-                                            rounded: 'md',
-                                            bg: 'slate.950',
-                                            borderWidth: '1px',
-                                            borderColor: 'slate.800',
-                                            fontSize: 'sm',
-                                            color: 'white',
-                                            _focus: { outlineColor: 'blue.500' }
-                                        })}
-                                        value={genreId()}
-                                        onChange={(e) => setGenreId(e.currentTarget.value)}
-                                        required
-                                    >
-                                        <option value="" disabled>Select a genre</option>
-                                        <For each={props.genres}>
-                                            {(genre) => <option value={genre.id}>{genre.name}</option>}
-                                        </For>
-                                    </select>
-                                </Box>
+                                                <FormField name="genreId">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root required invalid={!!field.error}>
+                                                            <Field.Label>
+                                                                Genre
+                                                                <Field.RequiredIndicator />
+                                                            </Field.Label>
+                                                            <select
+                                                                {...fieldProps}
+                                                                value={field.value || ''}
+                                                                class={css({
+                                                                    w: 'full',
+                                                                    h: '10',
+                                                                    px: '3',
+                                                                    rounded: 'md',
+                                                                    bg: 'bg.default',
+                                                                    borderWidth: '1px',
+                                                                    borderColor: 'border.default',
+                                                                    color: 'fg.default',
+                                                                    fontSize: 'sm',
+                                                                    _focus: { outlineColor: 'blue.500' }
+                                                                })}
+                                                            >
+                                                                <option value="">Select a genre</option>
+                                                                <For each={componentProps.genres}>
+                                                                    {(genre) => <option value={genre.id}>{genre.name}</option>}
+                                                                </For>
+                                                            </select>
+                                                            <Field.ErrorText>{field.error}</Field.ErrorText>
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
 
-                                <Box>
-                                    <label class={css({ display: 'block', mb: '2', fontSize: 'sm', fontWeight: 'medium' })}>
-                                        Initial Location
-                                    </label>
-                                    <select
-                                        class={css({
-                                            w: 'full',
-                                            h: '10',
-                                            px: '3',
-                                            rounded: 'md',
-                                            bg: 'slate.950',
-                                            borderWidth: '1px',
-                                            borderColor: 'slate.800',
-                                            fontSize: 'sm',
-                                            color: 'white',
-                                            _focus: { outlineColor: 'blue.500' }
-                                        })}
-                                        value={locationId()}
-                                        onChange={(e) => setLocationId(e.currentTarget.value)}
-                                    >
-                                        <option value="unassigned">Unassigned</option>
-                                        <For each={props.locations}>
-                                            {(location) => <option value={location.id}>{location.name}</option>}
-                                        </For>
-                                    </select>
-                                </Box>
+                                                <FormField name="locationId">
+                                                    {(field, fieldProps) => (
+                                                        <Field.Root>
+                                                            <Field.Label>Initial Location</Field.Label>
+                                                            <select
+                                                                {...fieldProps}
+                                                                value={field.value || 'unassigned'}
+                                                                class={css({
+                                                                    w: 'full',
+                                                                    h: '10',
+                                                                    px: '3',
+                                                                    rounded: 'md',
+                                                                    bg: 'bg.default',
+                                                                    borderWidth: '1px',
+                                                                    borderColor: 'border.default',
+                                                                    color: 'fg.default',
+                                                                    fontSize: 'sm',
+                                                                    _focus: { outlineColor: 'blue.500' }
+                                                                })}
+                                                            >
+                                                                <For each={componentProps.locations}>
+                                                                    {(location) => <option value={location.id}>{location.name}</option>}
+                                                                </For>
+                                                            </select>
+                                                        </Field.Root>
+                                                    )}
+                                                </FormField>
+                                            </Stack>
+                                        </Fieldset.Content>
+                                    </Fieldset.Root>
+                                </Dialog.Body>
 
-                                <Box class={css({ display: 'flex', justifyContent: 'flex-end', gap: '2', pt: '4' })}>
+                                <Dialog.Footer style={{ "margin-top": '1.5rem' }}>
                                     <Button
                                         type="button"
                                         variant="outline"
-                                        onClick={() => setIsOpen(false)}
+                                        onClick={handleCancel}
                                     >
                                         Cancel
                                     </Button>
-                                    <Button type="submit" loading={loading()}>
-                                        {loading() ? "Creating..." : "Create Item"}
+                                    <Button type="submit" loading={form.submitting}>
+                                        {form.submitting ? "Creating..." : "Create Item"}
                                     </Button>
-                                </Box>
-                            </Stack>
-                        </form>
-
-                        <Dialog.CloseTrigger />
-                    </Dialog.Content>
-                </Dialog.Positioner>
+                                </Dialog.Footer>
+                            </Form>
+                        </Dialog.Content>
+                    </Dialog.Positioner>
+                </Portal>
             </Dialog.Root>
         </>
     );

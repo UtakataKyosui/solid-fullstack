@@ -35,11 +35,11 @@ export const SearchBar: Component<SearchBarProps> = (props) => {
                         h: '10',
                         px: '3',
                         rounded: 'md',
-                        bg: 'slate.950',
+                        bg: 'bg.default',
                         borderWidth: '1px',
-                        borderColor: 'slate.800',
+                        borderColor: 'border.default',
+                        color: 'fg.default',
                         fontSize: 'sm',
-                        color: 'white',
                         _focus: {
                             outlineWidth: '2px',
                             outlineOffset: '2px',
@@ -60,11 +60,11 @@ export const SearchBar: Component<SearchBarProps> = (props) => {
                         h: '10',
                         px: '3',
                         rounded: 'md',
-                        bg: 'slate.950',
+                        bg: 'bg.default',
                         borderWidth: '1px',
-                        borderColor: 'slate.800',
+                        borderColor: 'border.default',
+                        color: 'fg.default',
                         fontSize: 'sm',
-                        color: 'white',
                         _focus: {
                             outlineWidth: '2px',
                             outlineOffset: '2px',
@@ -75,7 +75,6 @@ export const SearchBar: Component<SearchBarProps> = (props) => {
                     onChange={(e) => props.onLocationChange(e.currentTarget.value)}
                 >
                     <option value="">All Locations</option>
-                    <option value="unassigned">Unassigned</option>
                     <For each={props.locations}>
                         {(location) => <option value={location.id.toString()}>{location.name}</option>}
                     </For>

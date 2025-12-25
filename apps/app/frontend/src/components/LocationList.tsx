@@ -136,22 +136,23 @@ const LocationList: Component = () => {
 
             <Grid columns={{ base: 1, sm: 2, lg: 3 }} gap={{ base: '3', sm: '4' }}>
                 <For each={locations()} fallback={
-                    <Box color="slate.400">場所がありません</Box>
+                    <Box color="fg.muted">場所がありません</Box>
                 }>
                     {(location) => (
                         <Box
                             p={{ base: '3', sm: '4' }}
-                            bg="slate.800"
+                            bg="bg.subtle"
                             rounded="xl"
                             borderWidth="1px"
-                            borderColor="slate.700"
-                            _hover={{ borderColor: 'slate.600' }}
+                            borderColor="border.default"
+                            _hover={{ borderColor: 'border.muted' }}
                             transition="colors"
                         >
                             <Flex justify="space-between" mb="2" gap="2">
                                 <h3 class={css({
                                     fontWeight: 'semibold',
                                     fontSize: { base: 'base', sm: 'lg' },
+                                    color: 'fg.default',
                                     truncate: true,
                                     flex: '1'
                                 })}>
@@ -162,8 +163,8 @@ const LocationList: Component = () => {
                                         onClick={() => openEditDialog(location)}
                                         class={css({
                                             p: { base: '1.5', sm: '2' },
-                                            color: 'slate.400',
-                                            _hover: { color: 'blue.400', bg: 'slate.700' },
+                                            color: 'fg.muted',
+                                            _hover: { color: 'blue.400', bg: 'bg.subtle' },
                                             rounded: 'md',
                                             transition: 'colors'
                                         })}
@@ -175,8 +176,8 @@ const LocationList: Component = () => {
                                         onClick={() => handleDelete(location.id)}
                                         class={css({
                                             p: { base: '1.5', sm: '2' },
-                                            color: 'slate.400',
-                                            _hover: { color: 'red.400', bg: 'slate.700' },
+                                            color: 'fg.muted',
+                                            _hover: { color: 'red.400', bg: 'bg.subtle' },
                                             rounded: 'md',
                                             transition: 'colors'
                                         })}
@@ -188,7 +189,7 @@ const LocationList: Component = () => {
                             </Flex>
 
                             <Show when={location.description}>
-                                <p class={css({ fontSize: 'sm', color: 'slate.400', mb: '2' })}>
+                                <p class={css({ fontSize: 'sm', color: 'fg.muted', mb: '2' })}>
                                     {location.description}
                                 </p>
                             </Show>
@@ -200,7 +201,7 @@ const LocationList: Component = () => {
                                     rounded="full"
                                     style={{ 'background-color': getGenreColor(location.genre_id) }}
                                 />
-                                <span class={css({ fontSize: 'xs', color: 'slate.500' })}>
+                                <span class={css({ fontSize: 'xs', color: 'fg.muted' })}>
                                     {getGenreName(location.genre_id)}
                                 </span>
                             </Flex>
@@ -256,11 +257,11 @@ const LocationList: Component = () => {
                                             class={css({
                                                 w: 'full',
                                                 p: '2',
-                                                bg: 'slate.900',
+                                                bg: 'bg.default',
                                                 border: '1px solid',
-                                                borderColor: 'slate.700',
+                                                borderColor: 'border.default',
                                                 rounded: 'md',
-                                                color: 'white',
+                                                color: 'fg.default',
                                                 _focus: { outlineColor: 'blue.500' }
                                             })}
                                             required

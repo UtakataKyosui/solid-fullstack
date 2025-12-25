@@ -1,3 +1,7 @@
+import { text } from "./text";
+import { fieldset } from "./fieldset";
+import { field } from "./field";
+import { card } from "./card";
 import { select } from "./select";
 import { absoluteCenter } from './absolute-center'
 import { button } from './button'
@@ -24,7 +28,11 @@ export const recipes = {
   icon,
   input,
   spinner,
-  select
+  select,
+  card,
+  field,
+  fieldset,
+  text
 }
 
 export const slotRecipes = {

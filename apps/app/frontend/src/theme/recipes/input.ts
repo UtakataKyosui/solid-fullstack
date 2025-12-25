@@ -14,6 +14,7 @@ export const input = {
     textAlign: 'start',
     transition: 'colors',
     width: '100%',
+    color: 'fg.default',
     _disabled: {
       layerStyle: 'disabled',
     },
@@ -26,7 +27,9 @@ export const input = {
     variant: {
       outline: {
         borderWidth: '1px',
-        borderColor: 'gray.outline.border',
+        borderColor: 'border.default',
+        bg: 'bg.default',
+        color: 'fg.default',
         focusVisibleRing: 'inside',
         _invalid: {
           focusRingColor: 'error',
@@ -34,9 +37,10 @@ export const input = {
         },
       },
       surface: {
-        bg: 'gray.surface.bg',
+        bg: 'bg.default',
         borderWidth: '1px',
-        borderColor: 'gray.surface.border',
+        borderColor: 'border.default',
+        color: 'fg.default',
         focusVisibleRing: 'inside',
 
         _invalid: {
@@ -47,8 +51,8 @@ export const input = {
       subtle: {
         borderWidth: '1px',
         borderColor: 'transparent',
-        bg: 'gray.subtle.bg',
-        color: 'gray.subtle.fg',
+        bg: 'bg.subtle',
+        color: 'fg.default',
         focusVisibleRing: 'inside',
 
         _invalid: {
@@ -58,7 +62,7 @@ export const input = {
       },
       flushed: {
         borderBottomWidth: '1px',
-        borderBottomColor: 'gray.outline.border',
+        borderBottomColor: 'border.default',
         borderRadius: '0',
         color: 'fg.default',
         px: '0',
