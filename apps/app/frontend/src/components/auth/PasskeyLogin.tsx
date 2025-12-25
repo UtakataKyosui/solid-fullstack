@@ -21,10 +21,30 @@ const PasskeyLogin: Component = () => {
 
         setLoading(true);
         try {
-            // Step 1: Start registration
-            const startRes = await fetch('/api/auth/passkeys/register/start', {
+            // Step 1: Register new user (or auto-login if exists)
+            const registerRes = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: emailValue }),
+            });
+
+            if (!registerRes.ok) {
+                const errorText = await registerRes.text();
+                throw new Error(errorText || 'Failed to register user');
+            }
+
+            const loginData = await registerRes.json();
+            login(loginData); // Auto-login
+
+            addToast('success', 'Account created! Registering your passkey...');
+
+            // Step 2: Start Passkey registration (now authenticated)
+            const startRes = await fetch('/api/auth/passkeys/register/start', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${loginData.token}`,
+                },
             });
 
             if (!startRes.ok) {
@@ -33,7 +53,7 @@ const PasskeyLogin: Component = () => {
 
             const { challenge, state } = await startRes.json();
 
-            // Step 2: Create credential
+            // Step 3: Create credential
             const credential = await navigator.credentials.create({
                 publicKey: challenge.publicKey,
             }) as PublicKeyCredential;
@@ -42,10 +62,13 @@ const PasskeyLogin: Component = () => {
                 throw new Error('Failed to create passkey');
             }
 
-            // Step 3: Finish registration
+            // Step 4: Finish registration
             const finishRes = await fetch('/api/auth/passkeys/register/finish', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${loginData.token}`,
+                },
                 body: JSON.stringify({
                     state,
                     register: {
@@ -64,10 +87,10 @@ const PasskeyLogin: Component = () => {
                 throw new Error('Failed to complete passkey registration');
             }
 
-            addToast('success', 'Passkey registered successfully! Please login.');
+            addToast('success', 'Passkey registered successfully!');
         } catch (error) {
             console.error('Registration error:', error);
-            addToast('error', error instanceof Error ? error.message : 'Failed to register passkey');
+            addToast('error', error instanceof Error ? error.message : 'Failed to register');
         } finally {
             setLoading(false);
         }
