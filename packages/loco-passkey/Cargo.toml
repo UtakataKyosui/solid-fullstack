@@ -1,0 +1,22 @@
+[package]
+name = "loco-passkey"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+async-trait = "0.1"
+axum = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+loco-rs = { version = "0.16" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["rt", "macros"] }
+tracing = "0.1"
+uuid = { version = "1.6", features = ["v4", "serde"] }
+webauthn-rs = { version = "0.5", features = ["danger-allow-state-serialisation"] }
+base64 = "0.22"
+thiserror = "1.0"
+anyhow = "1"
+
+[dev-dependencies]
