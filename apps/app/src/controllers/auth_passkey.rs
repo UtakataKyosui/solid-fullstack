@@ -2,12 +2,16 @@
 #![allow(clippy::unnecessary_struct_initialization)]
 #![allow(clippy::unused_async)]
 use loco_rs::prelude::*;
-use serde::{Deserialize, Serialize};
-use webauthn_rs::prelude::*;
 use crate::models::{passkeys, users};
-use sea_orm::{ActiveModelTrait, ActiveValue, ModelTrait};
-use base64::Engine;
+use sea_orm::{ActiveValue, ModelTrait, QueryFilter, ColumnTrait, EntityTrait};
 use axum::http::HeaderMap;
+
+use loco_passkey::{
+    PasskeyService,
+    types::*,
+    service::parse_user_agent
+};
+use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct PasskeyResponse {
@@ -28,89 +32,30 @@ impl From<passkeys::Model> for PasskeyResponse {
     }
 }
 
-fn parse_user_agent(user_agent: &str) -> String {
-    let ua = user_agent.to_lowercase();
-    if ua.contains("windows") {
-        if ua.contains("chrome") { "Chrome on Windows".to_string() }
-        else if ua.contains("firefox") { "Firefox on Windows".to_string() }
-        else { "Windows Device".to_string() }
-    } else if ua.contains("mac os") || ua.contains("macintosh") {
-         if ua.contains("chrome") { "Chrome on macOS".to_string() }
-         else if ua.contains("safari") { "Safari on macOS".to_string() }
-         else if ua.contains("firefox") { "Firefox on macOS".to_string() }
-         else { "Mac Device".to_string() }
-    } else if ua.contains("android") {
-        "Android Device".to_string()
-    } else if ua.contains("iphone") || ua.contains("ipad") {
-        "iOS Device".to_string()
-    } else if ua.contains("linux") {
-        "Linux Device".to_string()
-    } else {
-        "Unknown Device".to_string()
-    }
+fn get_service() -> Result<PasskeyService> {
+    PasskeyService::new("localhost", "http://localhost:3300") // TODO: Configから取得
+        .map_err(|e| {
+            tracing::error!("Service config error: {:?}", e);
+            Error::InternalServerError
+        })
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct RegisterStartResponse {
-    pub challenge: CreationChallengeResponse,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct RegisterFinishArgs {
-    pub state: String,
-    pub register: RegisterPublicKeyCredential,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginStartResponse {
-    pub challenge: RequestChallengeResponse,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginFinishRequest {
-    pub challenge_id: Uuid,
-    pub login: PublicKeyCredential,
-}
-
-fn get_webauthn() -> Result<Webauthn> {
-    let rp_id = "localhost";
-    let rp_origin = Url::parse("http://localhost:3300").map_err(|_e| Error::InternalServerError)?;
-    let builder = WebauthnBuilder::new(rp_id, &rp_origin).map_err(|_e| Error::InternalServerError)?;
-
-    let webauthn = builder
-        .rp_name("localhost")
-        .build()
-        .map_err(|_e| Error::InternalServerError)?;
-
-    Ok(webauthn)
-}
 #[debug_handler]
 pub async fn register_start(
     auth: auth::JWT,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let user = crate::models::users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let service = get_service()?;
 
-    let webauthn = get_webauthn()?;
-    let (challenge, state) = webauthn
-        .start_passkey_registration(
-            user.pid,
-            &user.email,
-            &user.name,
-            None,
-        )
+    // 新しいAPI: One-liner
+    let response = service.start_registration_with_state(user.pid, &user.email, &user.name)
         .map_err(|e| {
             tracing::error!("Start passkey registration failed: {:?}", e);
             Error::InternalServerError
         })?;
 
-    let state_str = serde_json::to_string(&state).map_err(|_| Error::InternalServerError)?;
-    let encoded_state = base64::engine::general_purpose::STANDARD.encode(state_str);
-
-    format::json(RegisterStartResponseWithState {
-        challenge,
-        state: encoded_state,
-    })
+    format::json(response)
 }
 
 #[debug_handler]
@@ -120,30 +65,29 @@ pub async fn register_finish(
     State(ctx): State<AppContext>,
     Json(params): Json<RegisterFinishArgs>,
 ) -> Result<Response> {
-    let webauthn = get_webauthn()?;
+    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let service = get_service()?;
     
-    let decoded_state = base64::engine::general_purpose::STANDARD.decode(&params.state).map_err(|_| Error::BadRequest("Invalid state".into()))?;
-    let state: PasskeyRegistration = serde_json::from_slice(&decoded_state).map_err(|_| Error::BadRequest("Invalid state structure".into()))?;
-
-    let passkey = webauthn.finish_passkey_registration(&params.register, &state).map_err(|e| {
+    // 新しいAPI: Stateデコードも隠蔽
+    let passkey = service.finish_registration_with_state(
+        &params.state,
+        &params.register,
+    ).map_err(|e| {
         tracing::error!("Finish passkey registration failed: {:?}", e);
         Error::BadRequest("Registration failed".into())
     })?;
 
-    let user_valid = crate::models::users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-    
     let user_agent = headers
         .get("user-agent")
         .and_then(|h| h.to_str().ok())
         .unwrap_or("Unknown");
-    
     let device_name = parse_user_agent(user_agent);
 
     let act = passkeys::ActiveModel {
-        user_id: ActiveValue::Set(user_valid.id),
+        user_id: ActiveValue::Set(user.id),
         credential_id: ActiveValue::Set(passkey.cred_id().to_vec()),
-        public_key: ActiveValue::Set(vec![]), // Dummy value until we find correct field
-        sign_count: ActiveValue::Set(0), // Dummy value
+        public_key: ActiveValue::Set(vec![]),
+        sign_count: ActiveValue::Set(0),
         credential_params: ActiveValue::Set(serde_json::to_string(&passkey).unwrap_or_default()),
         name: ActiveValue::Set(device_name),
         ..Default::default()
@@ -153,55 +97,12 @@ pub async fn register_finish(
     format::empty()
 }
 
-
-// Re-defining start response to include state
-// Note: webauthn-rs types cannot be exported with ts-rs
-// TypeScript types are manually defined in frontend/src/types/passkey.ts
-#[derive(Serialize, Deserialize)]
-pub struct RegisterStartResponseWithState {
-    pub challenge: CreationChallengeResponse,
-    pub state: String,
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginStartResponseWithState {
-    pub challenge: RequestChallengeResponse,
-    pub state: String,
-}
-
-// Overwrite register_start to return state
 #[debug_handler]
 pub async fn register_start_impl(
     auth: auth::JWT,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let user = crate::models::users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-
-    let webauthn = get_webauthn()?;
-    let (challenge, state) = webauthn
-        .start_passkey_registration(
-            user.pid,
-            &user.email,
-            &user.name,
-            None,
-        )
-        .map_err(|e| {
-             tracing::error!("Start passkey opt registration failed: {:?}", e);
-             Error::InternalServerError
-        })?;
-
-    let state_str = serde_json::to_string(&state).map_err(|_| Error::InternalServerError)?;
-    let encoded_state = base64::engine::general_purpose::STANDARD.encode(state_str);
-
-    format::json(RegisterStartResponseWithState {
-        challenge,
-        state: encoded_state,
-    })
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct LoginStartRequest {
-    pub email: String,
+     register_start(auth, State(ctx)).await
 }
 
 #[debug_handler]
@@ -209,48 +110,35 @@ pub async fn login_start(
     State(ctx): State<AppContext>,
     Json(params): Json<LoginStartRequest>,
 ) -> Result<Response> {
-    let user = match crate::models::users::Model::find_by_email(&ctx.db, &params.email).await {
+    let user = match users::Model::find_by_email(&ctx.db, &params.email).await {
         Ok(user) => user,
         Err(_) => return Err(Error::NotFound),
     };
 
-    let passkeys = user.find_related(passkeys::Entity).all(&ctx.db).await?;
-    
-    // If no passkeys found for user, we cannot proceed with non-resident key flow
-    if passkeys.is_empty() {
+    let user_passkeys = user.find_related(passkeys::Entity).all(&ctx.db).await?;
+
+    if user_passkeys.is_empty() {
         return Err(Error::BadRequest("No passkeys registered for this user".into()));
     }
 
-    let webauthn = get_webauthn()?;
-    
-    let some_passkeys: Vec<Passkey> = passkeys.iter().filter_map(|p| {
-        // Deserialize credential_params which stores the Passkey struct
-        serde_json::from_str(&p.credential_params).ok()
-    }).collect();
+    // 新しいAPI: パース処理の隠蔽
+    let credential_params_list: Vec<String> = user_passkeys.iter().map(|p| p.credential_params.clone()).collect();
+    let some_passkeys = PasskeyService::parse_passkeys(&credential_params_list);
 
-    // Double check if we successfully deserialized any
     if some_passkeys.is_empty() {
          return Err(Error::BadRequest("No valid passkeys found".into()));
     }
 
-    let (challenge, state) = webauthn.start_passkey_authentication(&some_passkeys).map_err(|e| {
-        tracing::error!("Start passkey auth failed: {:?}", e);
-        Error::InternalServerError
-    })?;
+    let service = get_service()?;
+    
+    // 新しいAPI: One-liner
+    let response = service.start_authentication_with_state(&some_passkeys)
+        .map_err(|e| {
+             tracing::error!("Start passkey auth failed: {:?}", e);
+             Error::InternalServerError
+        })?;
 
-    let state_str = serde_json::to_string(&state).map_err(|_| Error::InternalServerError)?;
-    let encoded_state = base64::engine::general_purpose::STANDARD.encode(state_str);
-
-    format::json(LoginStartResponseWithState { 
-        challenge, 
-        state: encoded_state,
-    })
-}
-
-#[derive(Serialize, Deserialize)]
-pub struct AuthFinishArgs {
-    pub state: String,
-    pub login: PublicKeyCredential,
+    format::json(response)
 }
 
 use crate::views::auth::LoginResponse;
@@ -260,34 +148,32 @@ pub async fn login_finish(
     State(ctx): State<AppContext>,
     Json(params): Json<AuthFinishArgs>,
 ) -> Result<Response> {
-    let webauthn = get_webauthn()?;
-    let decoded_state = base64::engine::general_purpose::STANDARD.decode(&params.state).map_err(|_| Error::BadRequest("Invalid state".into()))?;
-    let state: PasskeyAuthentication = serde_json::from_slice(&decoded_state).map_err(|_| Error::BadRequest("Invalid state structure".into()))?;
+    let service = get_service()?;
 
-    let auth_result = webauthn.finish_passkey_authentication(&params.login, &state).map_err(|e| {
+    // 新しいAPI: Stateデコードも隠蔽
+    let auth_result = service.finish_authentication_with_state(
+        &params.state,
+        &params.login
+    ).map_err(|e| {
         tracing::error!("Finish passkey authentication failed: {:?}", e);
         Error::BadRequest("Authentication failed".into())
     })?;
-    
-    // Update sign_count and find user
+
     let passkey = passkeys::Entity::find()
         .filter(passkeys::Column::CredentialId.eq(auth_result.cred_id().to_vec()))
         .one(&ctx.db)
         .await?
         .ok_or_else(|| Error::Unauthorized("Passkey not found".into()))?;
 
-    // Update counter
     let mut active_passkey: passkeys::ActiveModel = passkey.clone().into();
     active_passkey.sign_count = ActiveValue::Set(auth_result.counter() as i32);
     active_passkey.update(&ctx.db).await?;
 
-    // Find user
-    let user = crate::models::users::Entity::find_by_id(passkey.user_id)
+    let user = users::Entity::find_by_id(passkey.user_id)
         .one(&ctx.db)
         .await?
         .ok_or_else(|| Error::Unauthorized("User not found".into()))?;
 
-    // Generate Token
     let jwt_secret = ctx.config.get_jwt_config()?;
     let token = user
         .generate_jwt(&jwt_secret.secret, jwt_secret.expiration)
@@ -301,13 +187,13 @@ pub async fn list(
     auth: auth::JWT,
     State(ctx): State<AppContext>,
 ) -> Result<Response> {
-    let user = crate::models::users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-    let passkeys = user.find_related(passkeys::Entity).all(&ctx.db).await?;
-    tracing::info!("User {} has {} passkeys", user.email, passkeys.len());
-    let response: Vec<PasskeyResponse> = passkeys.into_iter().map(PasskeyResponse::from).collect();
+    let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
+    let user_passkeys = user.find_related(passkeys::Entity).all(&ctx.db).await?;
+        
+    tracing::info!("User {} has {} passkeys", user.email, user_passkeys.len());
+    let response: Vec<PasskeyResponse> = user_passkeys.into_iter().map(PasskeyResponse::from).collect();
     format::json(response)
 }
-
 
 #[debug_handler]
 pub async fn delete_passkey(
@@ -332,7 +218,7 @@ pub async fn delete_passkey(
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/auth/passkeys")
-        .add("/register/start", post(register_start_impl))
+        .add("/register/start", post(register_start))
         .add("/register/finish", post(register_finish))
         .add("/login/start", post(login_start))
         .add("/login/finish", post(login_finish))

@@ -1,8 +1,9 @@
 use crate::{
     mailers::auth::AuthMailer,
     models::{
-        _entities::{passkeys, users},
+        _entities::users,
         users::{LoginParams, RegisterParams},
+        passkeys,
     },
     views::auth::{CurrentResponse, LoginResponse},
 };
@@ -156,14 +157,20 @@ async fn login(State(ctx): State<AppContext>, Json(params): Json<LoginParams>) -
         .generate_jwt(&jwt_secret.secret, jwt_secret.expiration)
         .or_else(|_| unauthorized("unauthorized!"))?;
 
-    let has_passkey = user.find_related(passkeys::Entity).count(&ctx.db).await? > 0;
+    let has_passkey = passkeys::Entity::find()
+        .filter(passkeys::Column::UserId.eq(user.id))
+        .count(&ctx.db)
+        .await? > 0;
     format::json(LoginResponse::new(&user, &token, has_passkey))
 }
 
 #[debug_handler]
 async fn current(auth: auth::JWT, State(ctx): State<AppContext>) -> Result<Response> {
     let user = users::Model::find_by_pid(&ctx.db, &auth.claims.pid).await?;
-    let has_passkey = user.find_related(passkeys::Entity).count(&ctx.db).await? > 0;
+    let has_passkey = passkeys::Entity::find()
+        .filter(passkeys::Column::UserId.eq(user.id))
+        .count(&ctx.db)
+        .await? > 0;
     format::json(CurrentResponse::new(&user, has_passkey))
 }
 
@@ -226,7 +233,10 @@ async fn magic_link_verify(
         .generate_jwt(&jwt_secret.secret, jwt_secret.expiration)
         .or_else(|_| unauthorized("unauthorized!"))?;
 
-    let has_passkey = user.find_related(passkeys::Entity).count(&ctx.db).await? > 0;
+    let has_passkey = passkeys::Entity::find()
+        .filter(passkeys::Column::UserId.eq(user.id))
+        .count(&ctx.db)
+        .await? > 0;
     format::json(LoginResponse::new(&user, &token, has_passkey))
 }
 
