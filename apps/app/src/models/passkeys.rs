@@ -1,5 +1,5 @@
 use sea_orm::entity::prelude::*;
-pub use super::_entities::passkeys::{ActiveModel, Model, Entity, Column};
+pub use super::_entities::passkeys::{ActiveModel, Model, Entity, Column}; // entitiesへのパスを修正
 pub type Passkeys = Entity;
 
 #[async_trait::async_trait]
