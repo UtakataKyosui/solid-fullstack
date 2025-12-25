@@ -18,10 +18,10 @@ export interface LoginStartResponse {
 // WebAuthn API標準型の拡張
 // これらはブラウザのグローバル型として既に定義されているが、
 // 明示的に再エクスポートして使いやすくする
-export type {
-    PublicKeyCredentialCreationOptions,
-    PublicKeyCredentialRequestOptions,
-    PublicKeyCredential,
-    AuthenticatorAttestationResponse,
-    AuthenticatorAssertionResponse,
-} from 'typescript';
+// export type {
+//     PublicKeyCredentialCreationOptions,
+//     PublicKeyCredentialRequestOptions,
+//     PublicKeyCredential,
+//     AuthenticatorAttestationResponse,
+//     AuthenticatorAssertionResponse,
+// } from 'typescript';
