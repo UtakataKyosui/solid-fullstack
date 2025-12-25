@@ -146,6 +146,7 @@ dependencies = [
  "chrono",
  "include_dir",
  "insta",
+ "loco-passkey",
  "loco-rs",
  "migration",
  "regex",
@@ -2275,6 +2276,25 @@ dependencies = [
  "tera",
  "thiserror 1.0.69",
  "tracing",
+]
+
+[[package]]
+name = "loco-passkey"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "base64 0.22.1",
+ "chrono",
+ "loco-rs",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "uuid",
+ "webauthn-rs",
 ]
 
 [[package]]

@@ -41,6 +41,7 @@ ts-rs = { version = "10.0", optional = true }
 # Force older versions that don't require edition2024
 base64ct = "=1.6.0"
 backon = "=1.2.0"
+loco-passkey = { path = "../../packages/loco-passkey" }
 
 [[bin]]
 name = "app-cli"
