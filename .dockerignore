@@ -1,0 +1,18 @@
+
+# Moon
+.moon/cache/
+.moon/docker/
+
+# Git
+.git/
+.gitignore
+
+# Node
+node_modules/
+
+# Rust
+target/
+**/*.rs.bk
+
+# Misc
+.DS_Store

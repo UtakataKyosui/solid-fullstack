@@ -33,6 +33,7 @@ services:
       RUST_LOG: debug
     volumes:
       - .:/app
+      - ../../packages:/packages
       - cargo_cache:/usr/local/cargo/registry
       - target_cache:/app/target
     depends_on:

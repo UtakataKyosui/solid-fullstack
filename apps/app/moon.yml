@@ -11,6 +11,7 @@ tasks:
       - 'config/**/*'
     deps:
       - 'build-frontend'
+      - 'loco-passkey:build'
   
   build-frontend:
     command: 'cd frontend && bun run build'
@@ -39,10 +40,35 @@ tasks:
       - 'tests/**/*'
 
   # Docker Compose management (using v2)
+  docker-scaffold:
+    command: 'moon docker scaffold app'
+    local: true
+    description: 'Scaffold the project workspace structure for Docker. Prepares minimal files needed for building.'
+
+  docker-setup:
+    command: 'moon docker setup'
+    local: true
+    description: 'Setup the Docker environment by installing toolchains (Bun/Node/Rust) required for the project.'
+
+  docker-prune:
+    command: 'moon docker prune'
+    local: true
+    description: 'Prune the Docker environment by removing unnecessary dependencies required only for setup/build.'
+
+  docker-file:
+    command: 'moon docker file app'
+    local: true
+    description: 'Generate a Dockerfile for the project based on moon configuration.'
+
   docker-build:
     command: 'docker compose -f docker-compose.dev.yml build'
     local: true
     description: 'Build Docker images for development'
+    deps:
+      - 'docker-scaffold'
+      # setupは通常Dockerfile内で実行されるか、scaffoldされたファイルを使うため、
+      # 単純なdocker compose buildの依存に入れるかはケースバイケースだが、
+      # 開発フローとしてscaffold -> buildの流れを定義しておく。
 
   docker-up:
     command: 'docker compose -f docker-compose.dev.yml up'
