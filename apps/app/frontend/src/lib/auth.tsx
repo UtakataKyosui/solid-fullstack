@@ -26,8 +26,15 @@ export function AuthProvider(props: { children: JSX.Element }) {
     // Load from local storage on mount
     const storedToken = localStorage.getItem("token");
     const storedUser = localStorage.getItem("user");
-    if (storedToken) setToken(storedToken);
-    if (storedUser) setUser(JSON.parse(storedUser));
+    if (storedToken && storedToken !== "undefined") setToken(storedToken);
+    if (storedUser && storedUser !== "undefined") {
+        try {
+            setUser(JSON.parse(storedUser));
+        } catch (e) {
+            console.error("Failed to parse stored user:", e);
+            localStorage.removeItem("user");
+        }
+    }
 
     const login = (data: { user: User; token: string }) => {
         setUser(data.user);

@@ -12,12 +12,16 @@ pub const MAGIC_LINK_LENGTH: i8 = 32;
 pub const MAGIC_LINK_EXPIRATION_MIN: i8 = 5;
 
 #[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "ts-export", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts-export", ts(export, export_to = "../frontend/src/types/"))]
 pub struct LoginParams {
     pub email: String,
     pub password: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
+#[cfg_attr(feature = "ts-export", derive(ts_rs::TS))]
+#[cfg_attr(feature = "ts-export", ts(export, export_to = "../frontend/src/types/"))]
 pub struct RegisterParams {
     pub email: String,
     pub password: String,
@@ -371,3 +375,24 @@ impl ActiveModel {
         self.update(db).await.map_err(ModelError::from)
     }
 }
+
+#[cfg(all(test, feature = "ts-export"))]
+mod ts_export_tests {
+    use super::*;
+    use ts_rs::TS;
+
+    #[test]
+    fn export_typescript_types() {
+        // このテストは型定義を生成するためだけに存在します
+        // ts-rsのexport()メソッドを呼び出すことで、型定義ファイルが生成されます
+        
+        // LoginParams の型定義を生成
+        LoginParams::export().expect("Failed to export LoginParams");
+        
+        // RegisterParams の型定義を生成
+        RegisterParams::export().expect("Failed to export RegisterParams");
+        
+        println!("TypeScript types exported successfully!");
+    }
+}
+

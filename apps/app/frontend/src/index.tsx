@@ -1,16 +1,27 @@
 import { render } from 'solid-js/web';
+import { Router } from '@solidjs/router';
 import App from './App';
 import './index.css';
-import { AuthProvider } from './lib/auth';
 import { ThemeProvider } from './lib/theme';
+import { AuthProvider } from './lib/auth';
 
 const root = document.getElementById('root');
-if (root) {
-  render(() => (
+
+if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
+  throw new Error(
+    'Root element not found. Did you forget to add it to your index.html? Or maybe the id attribute got misspelled?',
+  );
+}
+
+render(
+  () => (
     <ThemeProvider>
       <AuthProvider>
-        <App />
+        <Router>
+          <App />
+        </Router>
       </AuthProvider>
     </ThemeProvider>
-  ), root);
-}
+  ),
+  root!
+);

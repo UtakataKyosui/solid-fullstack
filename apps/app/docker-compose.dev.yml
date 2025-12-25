@@ -38,6 +38,7 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    entrypoint: ["/app/scripts/docker-entrypoint.sh"]
     command: cargo watch -x 'run -- start'
 
   # Frontend (Rsbuild dev server)
@@ -46,7 +47,7 @@ services:
     container_name: solid-frontend
     working_dir: /app
     ports:
-      - "3000:3000"
+      - "3300:3300"
     volumes:
       - ./frontend:/app
       - frontend_node_modules:/app/node_modules

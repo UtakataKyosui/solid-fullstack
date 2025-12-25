@@ -30,11 +30,14 @@ const Indicator = (props: IconProps) => {
 
   return (
     <Show when={StatusIcon()}>
-      {(Icon_) => (
-        <Icon data-type={toast().type} {...props}>
-          <Icon_ />
-        </Icon>
-      )}
+      {(IconComponent) => {
+        const Icon_ = IconComponent; // Renamed to avoid shadowing the imported Icon component
+        return (
+          <Icon data-type={toast().type} {...props}>
+            <Icon_ />
+          </Icon>
+        );
+      }}
     </Show>
   )
 }
@@ -84,10 +87,26 @@ export const Toaster = () => {
 // Helper function for creating toasts
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'loading'
 
-export const addToast = (type: ToastType, title: string, description?: string) => {
-  toaster.create({
-    title,
-    description,
-    type,
-  })
+export interface ToastOptions {
+  type: ToastType
+  title: string
+  description?: string
+}
+
+export const addToast = (options: ToastOptions | ToastType, title?: string, description?: string) => {
+  if (typeof options === 'object') {
+    // オブジェクト形式
+    toaster.create({
+      title: options.title,
+      description: options.description,
+      type: options.type,
+    })
+  } else {
+    // 個別引数形式（後方互換性のため）
+    toaster.create({
+      title: title!,
+      description,
+      type: options,
+    })
+  }
 }

@@ -79,4 +79,8 @@ tasks:
     local: true
     description: 'Reset database in Docker'
 
+  docker-reset-reboot:
+    command: 'docker compose -f docker-compose.dev.yml down -v && docker compose -f docker-compose.dev.yml up'
+    local: true
+    description: 'Reset and reboot Docker services'
 

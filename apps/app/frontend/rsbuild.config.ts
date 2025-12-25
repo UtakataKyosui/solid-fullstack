@@ -18,7 +18,7 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3300,
     proxy: {
       '/api': {
         // Use backend service name in Docker, localhost otherwise

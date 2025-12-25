@@ -74,11 +74,16 @@ pub struct LoginFinishRequest {
 
 fn get_webauthn() -> Result<Webauthn> {
     let rp_id = "localhost";
-    let rp_origin = Url::parse("http://localhost:3000").map_err(|_e| Error::InternalServerError)?; 
+    let rp_origin = Url::parse("http://localhost:3300").map_err(|_e| Error::InternalServerError)?;
     let builder = WebauthnBuilder::new(rp_id, &rp_origin).map_err(|_e| Error::InternalServerError)?;
-    builder.build().map_err(|_| Error::InternalServerError)
-}
 
+    let webauthn = builder
+        .rp_name("localhost")
+        .build()
+        .map_err(|_e| Error::InternalServerError)?;
+
+    Ok(webauthn)
+}
 #[debug_handler]
 pub async fn register_start(
     auth: auth::JWT,
@@ -150,6 +155,8 @@ pub async fn register_finish(
 
 
 // Re-defining start response to include state
+// Note: webauthn-rs types cannot be exported with ts-rs
+// TypeScript types are manually defined in frontend/src/types/passkey.ts
 #[derive(Serialize, Deserialize)]
 pub struct RegisterStartResponseWithState {
     pub challenge: CreationChallengeResponse,
@@ -322,54 +329,6 @@ pub async fn delete_passkey(
     }
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct RegisterRequest {
-    pub email: String,
-    pub name: Option<String>,
-}
-
-#[debug_handler]
-pub async fn register(
-    State(ctx): State<AppContext>,
-    Json(params): Json<RegisterRequest>,
-) -> Result<Response> {
-    use crate::models::_entities::users as users_entity;
-    use sea_orm::{ColumnTrait, EntityTrait, QueryFilter};
-    
-    // Check if user already exists
-    let existing = users_entity::Entity::find()
-        .filter(users_entity::Column::Email.eq(&params.email))
-        .one(&ctx.db)
-        .await?;
-    
-    if existing.is_some() {
-        return Err(Error::BadRequest("Email already registered. Please login instead.".into()));
-    }
-    
-    // Create new user
-    let user = users::ActiveModel {
-        pid: ActiveValue::Set(Uuid::new_v4()),
-        email: ActiveValue::Set(params.email.clone()),
-        name: ActiveValue::Set(params.name.unwrap_or_else(|| {
-            params.email.split('@').next().unwrap_or("User").to_string()
-        })),
-        password: ActiveValue::Set("".to_string()), // No password for Passkey-only users
-        api_key: ActiveValue::Set(Uuid::new_v4().to_string()),
-        ..Default::default()
-    };
-    
-    let user = user.insert(&ctx.db).await?;
-    
-    // Generate JWT
-    let jwt_secret = ctx.config.get_jwt_config()?;
-    let token = user
-        .generate_jwt(&jwt_secret.secret, jwt_secret.expiration)
-        .map_err(|_| Error::InternalServerError)?;
-    
-    format::json(LoginResponse::new(&user, &token, false))
-}
-
-
 pub fn routes() -> Routes {
     Routes::new()
         .prefix("api/auth/passkeys")
@@ -379,11 +338,4 @@ pub fn routes() -> Routes {
         .add("/login/finish", post(login_finish))
         .add("/", get(list))
         .add("/{id}", delete(delete_passkey))
-}
-
-// Separate route function for user registration (outside passkeys prefix)
-pub fn auth_routes() -> Routes {
-    Routes::new()
-        .prefix("api/auth")
-        .add("/register", post(register))
 }

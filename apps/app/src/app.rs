@@ -51,7 +51,6 @@ impl Hooks for App {
             .add_route(controllers::location::routes())
             .add_route(controllers::genre::routes())
             .add_route(controllers::auth_passkey::routes())
-            .add_route(controllers::auth_passkey::auth_routes())
             .add_route(controllers::auth::routes())
     }
     async fn connect_workers(ctx: &AppContext, queue: &Queue) -> Result<()> {

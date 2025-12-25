@@ -4,14 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "rsbuild build",
-    "dev": "rsbuild dev --open",
-    "preview": "rsbuild preview"
+    "prepare": "panda codegen",
+    "build": "panda codegen && rsbuild build",
+    "dev": "panda codegen && rsbuild dev",
+    "preview": "rsbuild preview",
+    "panda": "panda"
   },
   "dependencies": {
     "@ark-ui/solid": "^5.30.0",
     "@modular-forms/solid": "^0.25.1",
     "@simplewebauthn/browser": "^13.2.2",
+    "@solidjs/router": "^0.15.4",
     "@thisbeyond/solid-dnd": "^0.7.5",
     "lucide-solid": "^0.562.0",
     "solid-js": "^1.9.10",
@@ -20,8 +23,6 @@
   "devDependencies": {
     "@pandacss/dev": "^1.7.1",
     "@pandacss/postcss": "^1.7.1",
-    "@park-ui/cli": "^1.0.1",
-    "@park-ui/panda-preset": "^0.43.1",
     "@rsbuild/core": "^1.6.14",
     "@rsbuild/plugin-babel": "^1.0.6",
     "@rsbuild/plugin-solid": "^1.0.6",

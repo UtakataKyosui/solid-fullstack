@@ -3,6 +3,8 @@ import { startAuthentication } from "@simplewebauthn/browser";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "../../lib/auth";
+import type { RegisterParams, LoginParams } from "@/types";
+
 
 export default function Auth() {
     const { login } = useAuth();
@@ -20,10 +22,16 @@ export default function Auth() {
     const handleRegister = async (e: Event) => {
         e.preventDefault();
         try {
+            const registerParams: RegisterParams = {
+                email: email(),
+                password: password(),
+                name: name()
+            };
+
             const res = await fetch("/api/auth/register", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email(), password: password(), name: name() }),
+                body: JSON.stringify(registerParams),
             });
             if (res.ok) {
                 setMessage("Registration successful! Please login.");
@@ -39,10 +47,15 @@ export default function Auth() {
     const handleLogin = async (e: Event) => {
         e.preventDefault();
         try {
+            const loginParams: LoginParams = {
+                email: email(),
+                password: password()
+            };
+
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email: email(), password: password() }),
+                body: JSON.stringify(loginParams),
             });
             if (res.ok) {
                 const data = await res.json();
